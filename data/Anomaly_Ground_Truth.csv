@@ -1,0 +1,10 @@
+Event_ID,Event_Type,Entity_Type,Entity_ID,Start_Date,End_Date,Ground_Truth_Label,Intended_Cause,Severity
+E_SD_001,Sales drop,Project,P022,2025-04-01,2025-06-30,sales_drop,Pricing / confidence shock: demand multiplier x0.30,High
+E_SD_002,Sales drop,Project,P010,2024-09-01,2024-11-30,sales_drop,Pricing / confidence shock: demand multiplier x0.30,High
+E_CO_001,Cost overrun,Project,P026,2024-10-01,2024-12-31,cost_overrun,Contractor price escalation: cost x1.50,High
+E_CO_002,Cost overrun,Project,P030,2025-06-01,2025-08-31,cost_overrun,Contractor price escalation: cost x1.50,Medium
+E_CD_001,Construction delay,Project,P027,2025-01-01,2025-04-30,construction_delay,Works stalled (progress speed x0.05),High
+E_CD_002,Construction delay,Project,P018,2024-06-01,2024-08-31,construction_delay,Works stalled (progress speed x0.05),Medium
+E_IV_001,Inventory spike,Project,P038,2025-09-01,2025-09-30,inventory_spike,Unplanned release of a 300-unit phase,Medium
+E_CL_001,Collections drop,District,D05,2025-05-01,2025-07-31,collections_drop,"Payment delays +45-100 days, 25% non-payment",High
+E_CL_002,Collections drop,District,D03,2024-10-01,2024-12-31,collections_drop,"Payment delays +45-100 days, 25% non-payment",Medium

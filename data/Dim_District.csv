@@ -1,0 +1,11 @@
+District_ID,District_Name,Lifecycle_Archetype,District_Type,Development_Model,Target_Resident_Segment,Reference_Source,Data_Status
+D01,Synthetic District 01,Completed & Mature,Residential,Integrated,High-income / established,Simulation archetype (not a real district),Synthetic scenario
+D02,Synthetic District 02,Completed & Mature,Mixed-use,Integrated,High-income / established,Simulation archetype (not a real district),Synthetic scenario
+D03,Synthetic District 03,Sold Mostly - Service Gaps,Residential,Integrated,Middle-income families,Simulation archetype (not a real district),Synthetic scenario
+D04,Synthetic District 04,Sold Mostly - Service Gaps,Residential,Integrated,Middle-income families,Simulation archetype (not a real district),Synthetic scenario
+D05,Synthetic District 05,Partially Developed,Mixed-use,Phased,Mixed,Simulation archetype (not a real district),Synthetic scenario
+D06,Synthetic District 06,Partially Developed,Residential,Phased,Mixed,Simulation archetype (not a real district),Synthetic scenario
+D07,Synthetic District 07,Under Construction,Residential,Phased,Off-plan buyers / investors,Simulation archetype (not a real district),Synthetic scenario
+D08,Synthetic District 08,Under Construction,Mixed-use,Phased,Off-plan buyers / investors,Simulation archetype (not a real district),Synthetic scenario
+D09,Synthetic District 09,High Inventory Risk,Residential,Integrated,Upper-middle (price above segment),Simulation archetype (not a real district),Synthetic scenario
+D10,Synthetic District 10,High Inventory Risk,Residential,Integrated,Upper-middle (price above segment),Simulation archetype (not a real district),Synthetic scenario

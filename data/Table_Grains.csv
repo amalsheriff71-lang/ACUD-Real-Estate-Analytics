@@ -1,0 +1,14 @@
+Table,Grain,Primary_Key
+Dim_Date,One row per calendar date 2022-2026 (Egyptian calendar flags),DateKey
+Dim_District,One row per district (archetype),District_ID
+Dim_Developer,One row per developer,Developer_ID
+Dim_Project,One row per project,Project_ID
+Dim_Unit,One row per unit,Unit_ID
+Dim_Price_Index,One row per month,Month
+Fact_Sales,One row per sale transaction (a unit can be re-sold after a cancellation),Sale_ID
+Fact_Inventory_Monthly,Project x month,Project_ID + Month
+Fact_Collections_Monthly,Project x month (due and collected by due/paid month),Project_ID + Month
+Fact_Construction_Monthly,Project x month,Project_ID + Month
+Fact_District_Monthly_Status,District x month,District_ID + Month
+Fact_Utilities_Monthly,District x month,District_ID + Month
+Anomaly_Ground_Truth,One row per injected event (offline evaluation only),Event_ID

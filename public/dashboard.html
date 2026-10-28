@@ -1,0 +1,839 @@
+<title>Complaints Command Center</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky filter bar, KPI strip, chart grid on the left, findings + Cohere analytics assistant pinned on the right. */
+:root{
+  --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10); --hover:rgba(11,11,11,.05);
+  --accent:#2a78d6; --accent-ink:#ffffff; --accent-soft:rgba(42,120,214,.10);
+  --heat-lo:#e3effd; --heat-hi:#104281; --on-lo:#0b0b0b; --on-hi:#ffffff;
+  --good:#0ca30c; --good-text:#006300; --warn:#fab219; --warn-text:#7a5200; --serious:#ec835a; --crit:#d03b3b; --crit-text:#b02a2a;
+  --font:"IBM Plex Sans","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#0d0d0d; --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10); --hover:rgba(255,255,255,.06);
+  --accent:#3987e5; --accent-ink:#0b0b0b; --accent-soft:rgba(57,135,229,.16);
+  --heat-lo:#12263f; --heat-hi:#6da7ec; --on-lo:#f0efec; --on-hi:#0b0b0b;
+  --good-text:#0ca30c; --warn-text:#fab219; --crit:#e66767; --crit-text:#f08a8a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --page:#0d0d0d; --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10); --hover:rgba(255,255,255,.06);
+  --accent:#3987e5; --accent-ink:#0b0b0b; --accent-soft:rgba(57,135,229,.16);
+  --heat-lo:#12263f; --heat-hi:#6da7ec; --on-lo:#f0efec; --on-hi:#0b0b0b;
+  --good-text:#0ca30c; --warn-text:#fab219; --crit:#e66767; --crit-text:#f08a8a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--page);color:var(--ink);font:14px/1.45 var(--font);margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1560px;margin:0 auto}
+h1,h2,h3,p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* header + filters */
+.top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;padding:18px 0 12px}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.brand h1{font-size:20px;font-weight:600;letter-spacing:-.01em}
+.brand p{color:var(--ink2);font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);border:1px solid var(--border);background:var(--surface);padding:3px 9px;border-radius:99px}
+.top-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 11px;font-size:13px;color:var(--ink)}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent;font-weight:500}
+.btn.primary:hover{filter:brightness(1.06)}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 11px;font-size:13px;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink);font-weight:500}
+.seg button+button{border-left:1px solid var(--border)}
+.filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--page);padding:8px 0 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:end;border-bottom:1px solid var(--border)}
+.f{display:flex;flex-direction:column;gap:3px;min-width:0}
+.f label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.f select,.f input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 8px;min-width:0;max-width:100%}
+.f input[type=date]{width:136px}
+.grow{flex:1}
+.banner{margin-top:10px;padding:8px 12px;border:1px solid var(--border);background:var(--accent-soft);border-radius:8px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:13px}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi .l{font-size:12px;color:var(--ink2);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.kpi .v{font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.kpi .v small{font-size:14px;font-weight:500;color:var(--ink2);margin-left:2px}
+.kpi .d{font-size:12px;color:var(--ink2);min-height:17px}
+.kpi .t{font-size:11px;color:var(--muted)}
+.d .up-bad,.d .down-bad{color:var(--crit-text)} .d .up-good,.d .down-good{color:var(--good-text)}
+.pill{display:inline-flex;gap:4px;align-items:center;font-size:11px;font-weight:500;padding:1px 7px;border-radius:99px;white-space:nowrap;border:1px solid currentColor}
+.pill.ok{color:var(--good-text)} .pill.watch{color:var(--warn-text)} .pill.crit{color:var(--crit-text)} .pill.info{color:var(--ink2)}
+
+/* main grid */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:14px;align-items:start}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;min-width:0}
+.card.wide{grid-column:1/-1}
+.card header{display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.card h2{font-size:14px;font-weight:600}
+.card .sub{font-size:12px;color:var(--ink2)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:8px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+svg text{fill:var(--muted);font-family:var(--font);font-size:11px}
+.linkbtn{background:none;border:0;color:var(--accent);padding:0;font-size:12px}
+.linkbtn:hover{text-decoration:underline}
+.scroll{overflow-x:auto}
+
+/* bar rows */
+.rows{display:flex;flex-direction:column;gap:3px}
+.row{display:grid;grid-template-columns:128px minmax(0,1fr) 54px;gap:8px;align-items:center;text-align:left;background:none;border:0;border-radius:6px;padding:4px 4px;width:100%}
+.row:hover{background:var(--hover)}
+.row .nm{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .tr{position:relative;height:14px;background:var(--grid);border-radius:3px}
+.row .br{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:0 4px 4px 0}
+.row .vl{font-size:12px;text-align:right;color:var(--ink2)}
+.row.dim{opacity:.45} .row.sel{background:var(--accent-soft)}
+.row .tg{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.br.bad{background:var(--crit)}
+
+/* heatmap */
+.heat{display:grid;gap:2px;min-width:480px}
+.heat .h{font-size:11px;color:var(--muted);padding:2px 4px;display:flex;align-items:end;justify-content:center;text-align:center;line-height:1.15}
+.heat .rh{justify-content:flex-start;align-items:center;font-size:12px;color:var(--ink2);text-align:left}
+.cell{border:0;border-radius:4px;height:36px;font-size:12px;font-weight:500;position:relative}
+.cell.sel{outline:2px solid var(--ink);outline-offset:-2px}
+.cell:hover{filter:brightness(1.08)}
+
+/* tooltip */
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--page);padding:6px 9px;border-radius:6px;font-size:12px;line-height:1.35;max-width:240px;opacity:0;transition:opacity .08s}
+#tip b{font-weight:600}
+
+/* side panel */
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 78px);height:calc(100vh - 100px);min-height:520px;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tabs button{flex:1;background:none;border:0;padding:11px 8px;font-weight:500;color:var(--ink2);border-bottom:2px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.pane{flex:1;min-height:0;overflow:auto;padding:12px}
+.finding{border:1px solid var(--border);border-radius:8px;padding:10px 11px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px}
+.finding h3{font-size:13px;font-weight:600;line-height:1.3}
+.finding p{font-size:13px;color:var(--ink2)}
+.finding .acts{display:flex;gap:6px;flex-wrap:wrap}
+.chat{display:flex;flex-direction:column;min-height:0;flex:1}
+.msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:94%;font-size:13.5px;line-height:1.5;overflow-wrap:anywhere}
+.m.u{align-self:flex-end;background:var(--accent);color:var(--accent-ink);padding:7px 11px;border-radius:12px 12px 3px 12px}
+.m.a{align-self:flex-start}
+.m.a p{margin:0 0 7px} .m.a ul{margin:0 0 7px;padding-left:18px} .m.a li{margin-bottom:3px}
+.m.a .err{color:var(--crit-text)}
+.thinking{color:var(--muted);font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
+.chip{background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:4px 10px;font-size:12px;color:var(--ink2)}
+.chip:hover{background:var(--hover);color:var(--ink)}
+.composer{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);align-items:flex-end}
+.composer textarea{flex:1;resize:none;background:var(--page);border:1px solid var(--border);border-radius:8px;padding:7px 9px;min-height:38px;max-height:110px}
+.note{font-size:12px;color:var(--muted);padding:0 12px 10px}
+.empty{color:var(--ink2);font-size:13px}
+table.t{border-collapse:collapse;width:100%;font-size:12px}
+table.t th,table.t td{padding:4px 8px;border-bottom:1px solid var(--grid);text-align:right}
+table.t th:first-child,table.t td:first-child{text-align:left}
+
+@media (max-width:1100px){
+  .main{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;height:640px;order:-1}
+}
+@media (max-width:720px){
+  .charts{grid-template-columns:minmax(0,1fr)}
+  .kpi .v{font-size:24px}
+  .row{grid-template-columns:104px minmax(0,1fr) 46px}
+  .filters{position:static}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <h1>Complaints Command Center</h1>
+      <p>New Administrative Capital · complaints analytics · <span id="rangeLabel"></span></p>
+    </div>
+    <div class="top-actions">
+      <span class="badge" id="dataBadge">Connecting to PostgreSQL…</span>
+      <div class="seg" role="group" aria-label="Language">
+        <button id="langEn" aria-pressed="true">EN</button><button id="langAr" aria-pressed="false">عربي</button>
+      </div>
+      <label class="btn" for="csvFile" style="cursor:pointer">Load CSV</label>
+      <input id="csvFile" type="file" accept=".csv,text/csv" hidden>
+    </div>
+  </div>
+
+  <div class="filters" id="filters">
+    <div class="f"><label>Period</label>
+      <div class="seg" id="presets" role="group" aria-label="Period presets">
+        <button data-p="30" aria-pressed="true">30 days</button><button data-p="90" aria-pressed="false">90 days</button><button data-p="0" aria-pressed="false">All</button>
+      </div></div>
+    <div class="f"><label for="fFrom">From</label><input id="fFrom" type="date"></div>
+    <div class="f"><label for="fTo">To</label><input id="fTo" type="date"></div>
+    <div class="f"><label for="fZone">Zone</label><select id="fZone"></select></div>
+    <div class="f"><label for="fCat">Category</label><select id="fCat"></select></div>
+    <div class="f"><label for="fSrc">Source</label><select id="fSrc"></select></div>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="kpis" id="kpis" aria-label="Key performance indicators"></section>
+
+  <div class="main">
+    <div class="charts">
+      <section class="card wide">
+        <header><h2 id="trendTitle">Complaints over time</h2>
+          <span class="sub"><button class="linkbtn" id="trendToggle">View as table</button></span></header>
+        <div id="trend"></div>
+        <div class="legend" id="trendLegend"></div>
+      </section>
+
+      <section class="card">
+        <header><h2>By category</h2><span class="sub">Click a bar to filter</span></header>
+        <div class="rows" id="catRows"></div>
+      </section>
+
+      <section class="card">
+        <header><h2>SLA compliance</h2>
+          <div class="seg" id="slaSeg" role="group" aria-label="Group SLA by">
+            <button data-v="cat" aria-pressed="true">By category</button><button data-v="zone" aria-pressed="false">By zone</button></div></header>
+        <div class="rows" id="slaRows"></div>
+        <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>Meets target</span><span><i class="sw" style="background:var(--crit)"></i>Below target</span><span><i class="sw" style="background:var(--ink);width:2px"></i>Target</span></div>
+      </section>
+
+      <section class="card wide">
+        <header><h2>Where problems concentrate</h2><span class="sub">Zone × category, complaints in period. Click a cell to filter.</span></header>
+        <div class="scroll"><div class="heat" id="heat"></div></div>
+      </section>
+
+      <section class="card">
+        <header><h2>Volume by zone</h2><span class="sub">Click to filter</span></header>
+        <div class="rows" id="zoneRows"></div>
+      </section>
+
+      <section class="card">
+        <header><h2>When complaints arrive</h2><span class="sub">By hour of day</span></header>
+        <div id="hours"></div>
+      </section>
+    </div>
+
+    <aside class="side" id="ask" aria-label="Insights and assistant">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tabF" aria-selected="true">Findings</button>
+        <button role="tab" id="tabC" aria-selected="false">Ask Cohere</button>
+      </div>
+      <div class="pane" id="paneF"></div>
+      <div class="chat" id="paneC" hidden>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        <div class="chips" id="chips"></div>
+        <div class="composer">
+          <textarea id="q" rows="1" placeholder="Ask about the data in view…" aria-label="Question"></textarea>
+          <button class="btn primary" id="send">Send</button>
+          <button class="btn" id="stop" hidden>Stop</button>
+        </div>
+        <div class="note" id="chatNote">Cohere answers from live PostgreSQL aggregates and the selected filters.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script id="seed" type="application/json">
+{
+  "cats": [
+    "Other complaint",
+    "Street lighting",
+    "Roads and pavements",
+    "Waste build-up",
+    "Water leak",
+    "Parking violations",
+    "Noise"
+  ],
+  "cats_ar": [
+    "شكوى أخرى",
+    "إنارة الشوارع",
+    "الطرق والأرصفة",
+    "تراكم النفايات",
+    "تسرب مياه",
+    "مخالفات انتظار",
+    "ضوضاء"
+  ],
+  "sla": [48, 48, 48, 48, 48, 48, 48],
+  "zones": [
+    ["Z01", "Third District", "الحي الثالث"]
+  ],
+  "src": ["Portal"],
+  "rows": [
+    ["2026-10-23 12:00", 0, 0, 0, null, null]
+  ]
+}
+</script>
+
+<script>
+(() => {
+"use strict";
+/* ---------------- data model ---------------- */
+const API_BASE_URL = window.DASHBOARD_API_BASE_URL || "http://127.0.0.1:8000";
+const SEED = JSON.parse(document.getElementById("seed").textContent);
+const SHORT_EN = {"Street lighting":"Lighting","Roads and pavements":"Roads","Waste build-up":"Waste","Water leak":"Water leak","Parking violations":"Parking","Noise":"Noise"};
+const DAY = 864e5;
+let D = null;              // active dataset {cats, catsAr, sla, zones, srcs, rows, isSeed, end, min, max}
+const S = {from:0,to:0,zone:-1,cat:-1,src:-1,lang:"en",sla:"cat",table:false,preset:"30"};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const isoDay = d => new Date(d*DAY).toISOString().slice(0,10);
+const fmtDay = d => new Date(d*DAY).toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"});
+const fmtDayY = d => new Date(d*DAY).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"});
+const parseIso = s => { const [y,m,d]=s.split("-").map(Number); return Date.UTC(y,m-1,d)/DAY; };
+const pct = (a,b) => b ? a/b*100 : null;
+const f1 = x => x==null||isNaN(x) ? "–" : (Math.round(x*10)/10).toLocaleString("en-US");
+const f0 = x => x==null||isNaN(x) ? "–" : Math.round(x).toLocaleString("en-US");
+
+function loadSeed(){
+  const rows = SEED.rows.map((r,i)=>{
+    const [dd,hh] = r[0].split(" "); const d=parseIso(dd); const [h,mi]=hh.split(":").map(Number);
+    return {id:"SR-"+String(i+1).padStart(6,"0"), d, h, ts:d*DAY+h*36e5+mi*6e4, z:r[1], c:r[2], s:r[3], r:r[4], q:r[5]};
+  });
+  return finalize({cats:SEED.cats, catsAr:SEED.cats_ar, sla:SEED.sla.slice(), zones:SEED.zones.map(z=>({id:z[0],en:z[1],ar:z[2]})), srcs:SEED.src.slice(), rows, isSeed:true});
+}
+function finalize(ds){
+  ds.min = Math.min(...ds.rows.map(r=>r.d)); ds.max = Math.max(...ds.rows.map(r=>r.d));
+  ds.end = Math.max(...ds.rows.map(r=>r.ts)) + 36e5;      // moment the data was cut
+  ds.hasRes = ds.rows.some(r=>r.r!=null); ds.hasQ = ds.rows.some(r=>r.q!=null); ds.hasStatus = ds.rows.some(r=>r.status!=null);
+  return ds;
+}
+const nameC = i => i<0 ? "All categories" : (S.lang==="ar" && D.catsAr[i] ? D.catsAr[i] : D.cats[i]);
+const shortC = i => S.lang==="ar" ? (D.catsAr[i]||D.cats[i]) : (SHORT_EN[D.cats[i]] || D.cats[i].slice(0,12));
+const nameZ = i => i<0 ? "All zones" : (S.lang==="ar" && D.zones[i].ar ? D.zones[i].ar : D.zones[i].en);
+
+/* ---------------- stats ---------------- */
+function quant(arr,p){ if(!arr.length) return null; const a=arr.slice().sort((x,y)=>x-y); const i=(a.length-1)*p, lo=Math.floor(i), hi=Math.ceil(i); return a[lo]+(a[hi]-a[lo])*(i-lo); }
+function stats(rows){
+  let open=0, overdue=0, within=0, resolved=0, qs=0, qn=0; const res=[];
+  const resolvedStatuses = new Set(["resolved","closed","completed","complete","done"]);
+  for(const r of rows){
+    if(D.hasStatus){
+      const isResolved = resolvedStatuses.has(String(r.status||"").toLowerCase());
+      if(isResolved){ resolved++; if(r.r!=null){ res.push(r.r); if(r.r<=D.sla[r.c]) within++; } }
+      else { open++; if(D.hasRes && (D.end-r.ts)/36e5 > D.sla[r.c]) overdue++; }
+    } else if(r.r==null){ if(D.hasRes){ open++; if((D.end-r.ts)/36e5 > D.sla[r.c]) overdue++; } }
+    else { resolved++; res.push(r.r); if(r.r<=D.sla[r.c]) within++; }
+    if(r.q!=null){ qs+=r.q; qn++; }
+  }
+  return {n:rows.length, open, overdue, resolved, within, sla:pct(within,resolved), med:quant(res,.5), p90:quant(res,.9), csat:qn?qs/qn:null, qn};
+}
+function pick({from=S.from,to=S.to,zone=S.zone,cat=S.cat,src=S.src}={}){
+  return D.rows.filter(r=>r.d>=from&&r.d<=to&&(zone<0||r.z===zone)&&(cat<0||r.c===cat)&&(src<0||r.s===src));
+}
+const weekIdx = d => Math.floor((d+3)/7);            // Monday-based
+const weekStart = w => w*7-3;
+
+/* ---------------- tooltip ---------------- */
+const tip = $("tip");
+function showTip(html,x,y){ tip.innerHTML=html; tip.style.opacity=1; const w=tip.offsetWidth,h=tip.offsetHeight;
+  let l=x+12, t=y-h-10; if(l+w>innerWidth-8) l=x-w-12; if(t<8) t=y+16; tip.style.left=Math.max(8,l)+"px"; tip.style.top=t+"px"; }
+const hideTip = () => { tip.style.opacity=0; };
+function tipFor(el,html){
+  el.addEventListener("pointermove",e=>showTip(typeof html==="function"?html():html,e.clientX,e.clientY));
+  el.addEventListener("pointerleave",hideTip);
+  el.addEventListener("focus",()=>{const b=el.getBoundingClientRect(); showTip(typeof html==="function"?html():html,b.left+b.width/2,b.top);});
+  el.addEventListener("blur",hideTip);
+}
+
+/* ---------------- KPIs ---------------- */
+const TARGETS = {sla:90, slaCrit:80, csat:4.0, csatCrit:3.5};
+function prevRange(){ const len=S.to-S.from+1, pf=S.from-len, pt=S.from-1; return pf>=D.min ? {from:pf,to:pt} : null; }
+function delta(cur,prev,kind,goodDir){
+  if(prev==null||cur==null) return "";
+  let diff, txt;
+  if(kind==="pct"){ if(!prev) return ""; diff=(cur-prev)/prev*100; txt=(diff>=0?"+":"")+f1(diff)+"%"; }
+  else if(kind==="pp"){ diff=cur-prev; txt=(diff>=0?"+":"")+f1(diff)+" pp"; }
+  else { diff=cur-prev; txt=(diff>=0?"+":"")+f1(diff); }
+  if(Math.abs(diff)<0.05) return `<span>no change vs prior period</span>`;
+  const up=diff>0, good=(goodDir==="up")===up;
+  return `<span class="${up?"up":"down"}-${good?"good":"bad"}">${up?"▲":"▼"} ${txt}</span> vs prior period`;
+}
+function status(kind,val){
+  if(val==null) return `<span class="pill info">No data</span>`;
+  if(kind==="sla") return val>=TARGETS.sla?`<span class="pill ok">✓ On target</span>`:val>=TARGETS.slaCrit?`<span class="pill watch">▲ Watch</span>`:`<span class="pill crit">● Critical</span>`;
+  if(kind==="csat") return val>=TARGETS.csat?`<span class="pill ok">✓ On target</span>`:val>=TARGETS.csatCrit?`<span class="pill watch">▲ Watch</span>`:`<span class="pill crit">● Critical</span>`;
+  return "";
+}
+function kpis(){
+  const cur=stats(pick()), pr=prevRange(), pv=pr?stats(pick(pr)):null;
+  const heat={}; pick().forEach(r=>{const k=r.z+"-"+r.c; heat[k]=(heat[k]||0)+1;});
+  const top=Object.entries(heat).sort((a,b)=>b[1]-a[1])[0];
+  const cards=[];
+  cards.push(`<div class="kpi"><div class="l">Complaints</div><div class="v num">${f0(cur.n)}</div><div class="d">${delta(cur.n,pv&&pv.n,"pct","down")||"&nbsp;"}</div><div class="t">${f1(cur.n/Math.max(1,S.to-S.from+1))} per day</div></div>`);
+  if(D.hasRes || D.hasStatus){
+    cards.push(`<div class="kpi"><div class="l">Open backlog ${D.hasRes?(cur.overdue? `<span class="pill crit">● ${f0(cur.overdue)} overdue</span>`:`<span class="pill ok">✓ none overdue</span>`):""}</div><div class="v num">${f0(cur.open)}</div><div class="d">${pct(cur.open,cur.n)==null?"":f1(pct(cur.open,cur.n))+"% of complaints still open"}</div><div class="t">${D.hasRes?"Overdue = open past its category SLA":"Based on current complaint status"}</div></div>`);
+  }
+  if(D.hasRes){
+    cards.push(`<div class="kpi"><div class="l">SLA compliance ${status("sla",cur.sla)}</div><div class="v num">${f1(cur.sla)}<small>%</small></div><div class="d">${delta(cur.sla,pv&&pv.sla,"pp","up")||"&nbsp;"}</div><div class="t">Target ≥ ${TARGETS.sla}% · critical &lt; ${TARGETS.slaCrit}%</div></div>`);
+    cards.push(`<div class="kpi"><div class="l">Median resolution</div><div class="v num">${f1(cur.med)}<small>h</small></div><div class="d">${delta(cur.med,pv&&pv.med,"pct","down")||"&nbsp;"}</div><div class="t">90th percentile ${f1(cur.p90)} h</div></div>`);
+  }
+  if(D.hasQ) cards.push(`<div class="kpi"><div class="l">Satisfaction ${status("csat",cur.csat)}</div><div class="v num">${f1(cur.csat)}<small>/ 5</small></div><div class="d">${delta(cur.csat,pv&&pv.csat,"abs","up")||"&nbsp;"}</div><div class="t">${f0(cur.qn)} ratings · target ≥ ${TARGETS.csat.toFixed(1)}</div></div>`);
+  cards.push(`<div class="kpi"><div class="l">Top hotspot</div><div class="v" style="font-size:17px;line-height:1.25">${top?esc(nameZ(+top[0].split("-")[0]))+"<br>"+esc(nameC(+top[0].split("-")[1])):"–"}</div><div class="d">${top?f0(top[1])+" complaints · "+f1(pct(top[1],cur.n))+"% of period":""}</div><div class="t">Largest zone × category cell</div></div>`);
+  $("kpis").innerHTML=cards.join("");
+  return {cur,pv};
+}
+
+/* ---------------- charts ---------------- */
+function trend(){
+  const rows=pick(); const span=S.to-S.from+1; const daily=span<=45;
+  const map=new Map();
+  if(daily){ for(let d=S.from; d<=S.to; d++) map.set(d,0); rows.forEach(r=>map.set(r.d,(map.get(r.d)||0)+1)); }
+  else { for(let w=weekIdx(S.from); w<=weekIdx(S.to); w++) map.set(w,0); rows.forEach(r=>{const w=weekIdx(r.d); map.set(w,(map.get(w)||0)+1);}); }
+  const B=[...map.entries()].map(([k,n])=>({k,n,label: daily?fmtDay(k):"Week of "+fmtDay(Math.max(weekStart(k),S.from)), short: daily?fmtDay(k):fmtDay(Math.max(weekStart(k),S.from))}));
+  // partial first/last week would mislead a weekly series; drop buckets with <7 days unless it is the only one
+  if(!daily && B.length>2){ const firstFull=weekStart(B[0].k)>=S.from, lastFull=weekStart(B[B.length-1].k)+6<=S.to; if(!firstFull) B.shift(); if(!lastFull) B.pop(); }
+  $("trendTitle").textContent = (daily?"Daily":"Weekly")+" complaints"+(S.zone>=0||S.cat>=0?" · "+[S.zone>=0?nameZ(S.zone):"",S.cat>=0?nameC(S.cat):""].filter(Boolean).join(" · "):"");
+  const host=$("trend");
+  if(!B.length){ host.innerHTML='<p class="empty">No complaints match these filters.</p>'; $("trendLegend").innerHTML=""; return; }
+  const vals=B.map(b=>b.n), mean=vals.reduce((a,b)=>a+b,0)/vals.length, sd=Math.sqrt(vals.reduce((a,b)=>a+(b-mean)**2,0)/vals.length);
+  const thr=mean+2*Math.max(sd,Math.sqrt(Math.max(mean,1)));
+  const anomalies=B.map((b,i)=>b.n>thr&&b.n>=5?i:-1).filter(i=>i>=0);
+  $("trendLegend").innerHTML=`<span><i class="sw" style="background:var(--accent)"></i>Complaints per ${daily?"day":"week"}</span><span><i class="sw" style="background:var(--muted);height:2px;vertical-align:3px"></i>Average ${f1(mean)}</span>`+(anomalies.length?`<span><i class="sw" style="background:var(--crit);border-radius:50%"></i>Unusually high (${anomalies.length})</span>`:"");
+  if(S.table){
+    host.innerHTML=`<div class="scroll" style="max-height:260px;overflow:auto"><table class="t"><thead><tr><th>${daily?"Day":"Week"}</th><th>Complaints</th></tr></thead><tbody>${B.map(b=>`<tr><td>${esc(b.label)}</td><td class="num">${b.n}</td></tr>`).join("")}</tbody></table></div>`; return;
+  }
+  const W=Math.max(300,host.clientWidth||600), H=230, m={l:34,r:12,t:12,b:26};
+  const ymax=niceMax(Math.max(...vals,thr)), x=i=>m.l+(B.length===1?(W-m.l-m.r)/2:i*(W-m.l-m.r)/(B.length-1)), y=v=>H-m.b-v/ymax*(H-m.t-m.b);
+  let g=""; for(let i=0;i<=4;i++){ const v=ymax*i/4; g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end">${f0(v)}</text>`; }
+  const nt=Math.min(B.length,W<520?4:7); let xt=""; for(let j=0;j<nt;j++){ const i=Math.round(j*(B.length-1)/Math.max(1,nt-1)); xt+=`<text x="${x(i)}" y="${H-8}" text-anchor="${j===0?"start":j===nt-1?"end":"middle"}">${esc(B[i].short)}</text>`; }
+  const line=B.map((b,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(b.n).toFixed(1)).join(" ");
+  const area=line+` L${x(B.length-1)} ${y(0)} L${x(0)} ${y(0)} Z`;
+  const dots=anomalies.map(i=>`<circle cx="${x(i)}" cy="${y(B[i].n)}" r="5" fill="var(--crit)" stroke="var(--surface)" stroke-width="2"/>`).join("");
+  host.innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc($("trendTitle").textContent)}">${g}${xt}
+   <path d="${area}" fill="var(--accent)" opacity=".12"/><line x1="${m.l}" x2="${W-m.r}" y1="${y(mean)}" y2="${y(mean)}" stroke="var(--muted)" stroke-dasharray="4 4"/>
+   <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${dots}
+   <line id="cx" y1="${m.t}" y2="${H-m.b}" stroke="var(--axis)" opacity="0"/><circle id="cd" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" opacity="0"/>
+   <rect x="${m.l}" y="0" width="${W-m.l-m.r}" height="${H-m.b}" fill="transparent" id="hit"/></svg>`;
+  const hit=host.querySelector("#hit"), cx=host.querySelector("#cx"), cd=host.querySelector("#cd");
+  hit.addEventListener("pointermove",e=>{ const r=hit.getBoundingClientRect(); const px=e.clientX-r.left+m.l;
+    let i=B.length===1?0:Math.round((px-m.l)/((W-m.l-m.r)/(B.length-1))); i=Math.max(0,Math.min(B.length-1,i));
+    cx.setAttribute("x1",x(i));cx.setAttribute("x2",x(i));cx.setAttribute("opacity",1);cd.setAttribute("cx",x(i));cd.setAttribute("cy",y(B[i].n));cd.setAttribute("opacity",1);
+    const diff=B[i].n-mean; showTip(`<b>${esc(B[i].label)}</b><br>${B[i].n} complaints<br>${diff>=0?"+":""}${f1(diff)} vs average`,e.clientX,e.clientY); });
+  hit.addEventListener("pointerleave",()=>{cx.setAttribute("opacity",0);cd.setAttribute("opacity",0);hideTip();});
+}
+function niceMax(v){ if(v<=5) return 5; const p=Math.pow(10,Math.floor(Math.log10(v))); for(const s of [1,2,2.5,5,10]) if(v<=s*p) return s*p; return 10*p; }
+
+function barRows(host,items,opts){
+  // items: [{i,name,val,label,max,bad,tip,sel,dim}]
+  host.innerHTML="";
+  const mx=opts.max ?? Math.max(1,...items.map(x=>x.val||0));
+  items.forEach(it=>{
+    const b=document.createElement("button"); b.className="row"+(it.sel?" sel":"")+(it.dim?" dim":""); b.setAttribute("aria-label",`${it.name}: ${it.label}`);
+    b.innerHTML=`<span class="nm" dir="auto">${esc(it.name)}</span><span class="tr"><span class="br${it.bad?" bad":""}" style="width:${it.val==null?0:Math.max(0,it.val)/mx*100}%"></span>${opts.target!=null?`<span class="tg" style="left:${opts.target/mx*100}%"></span>`:""}</span><span class="vl num">${esc(it.label)}</span>`;
+    b.onclick=()=>it.click&&it.click(); tipFor(b,it.tip); host.append(b);
+  });
+}
+function catRows(){
+  const rows=pick({cat:-1}); const cnt=D.cats.map(()=>0); rows.forEach(r=>cnt[r.c]++);
+  const items=D.cats.map((_,i)=>({i,name:nameC(i),val:cnt[i],label:f0(cnt[i]),tip:`<b>${esc(nameC(i))}</b><br>${cnt[i]} complaints (${f1(pct(cnt[i],rows.length))}%)`,sel:S.cat===i,dim:S.cat>=0&&S.cat!==i,click:()=>setF({cat:S.cat===i?-1:i})})).sort((a,b)=>b.val-a.val);
+  barRows($("catRows"),items,{});
+}
+function zoneRows(){
+  const rows=pick({zone:-1}); const cnt=D.zones.map(()=>0); rows.forEach(r=>cnt[r.z]++);
+  const items=D.zones.map((_,i)=>({i,name:nameZ(i),val:cnt[i],label:f0(cnt[i]),tip:`<b>${esc(nameZ(i))}</b><br>${cnt[i]} complaints (${f1(pct(cnt[i],rows.length))}%)`,sel:S.zone===i,dim:S.zone>=0&&S.zone!==i,click:()=>setF({zone:S.zone===i?-1:i})})).sort((a,b)=>b.val-a.val);
+  barRows($("zoneRows"),items,{});
+}
+function slaRows(){
+  const host=$("slaRows");
+  if(!D.hasRes){ host.innerHTML='<p class="empty">Add a resolved_at or resolution_hours column to see SLA compliance.</p>'; return; }
+  const byCat=S.sla==="cat"; const rows=byCat?pick({cat:-1}):pick({zone:-1});
+  const n=byCat?D.cats.length:D.zones.length; const g=Array.from({length:n},()=>[]); rows.forEach(r=>g[byCat?r.c:r.z].push(r));
+  const items=g.map((a,i)=>{ const s=stats(a); const v=s.sla; const bad=v!=null&&v<TARGETS.sla;
+    return {name:byCat?nameC(i):nameZ(i),val:v,label:v==null?"–":f0(v)+"%",bad,
+      tip:`<b>${esc(byCat?nameC(i):nameZ(i))}</b><br>${v==null?"No resolved complaints":f1(v)+"% within SLA"+(byCat?" ("+D.sla[i]+" h)":"")}<br>Median ${f1(s.med)} h · ${f0(s.open)} open`,
+      sel:byCat?S.cat===i:S.zone===i, dim:byCat?(S.cat>=0&&S.cat!==i):(S.zone>=0&&S.zone!==i), click:()=>setF(byCat?{cat:S.cat===i?-1:i}:{zone:S.zone===i?-1:i})}; });
+  items.sort((a,b)=>(a.val??101)-(b.val??101));
+  barRows(host,items,{max:100,target:TARGETS.sla});
+}
+function heatmap(){
+  const rows=pick({zone:-1,cat:-1}); const nz=D.zones.length, nc=D.cats.length; const m=Array.from({length:nz},()=>Array(nc).fill(0)); rows.forEach(r=>m[r.z][r.c]++);
+  const mx=Math.max(1,...m.flat()); const host=$("heat"); host.style.gridTemplateColumns=`112px repeat(${nc},minmax(54px,1fr))`; host.innerHTML="";
+  host.append(Object.assign(document.createElement("div"),{className:"h"}));
+  for(let c=0;c<nc;c++) host.append(Object.assign(document.createElement("div"),{className:"h",textContent:shortC(c)}));
+  for(let z=0;z<nz;z++){
+    host.append(Object.assign(document.createElement("div"),{className:"h rh",textContent:nameZ(z)}));
+    for(let c=0;c<nc;c++){
+      const v=m[z][c], t=v/mx; const b=document.createElement("button"); b.className="cell"+(S.zone===z&&S.cat===c?" sel":"");
+      b.style.background=`color-mix(in srgb, var(--heat-hi) ${Math.round(t*100)}%, var(--heat-lo))`; b.style.color=t>.5?"var(--on-hi)":"var(--on-lo)"; b.textContent=v;
+      b.setAttribute("aria-label",`${nameZ(z)}, ${nameC(c)}: ${v} complaints`);
+      b.onclick=()=>setF(S.zone===z&&S.cat===c?{zone:-1,cat:-1}:{zone:z,cat:c});
+      tipFor(b,`<b>${esc(nameZ(z))}</b> · ${esc(nameC(c))}<br>${v} complaints`); host.append(b);
+    }
+  }
+}
+function hours(){
+  const rows=pick(); const h=Array(24).fill(0); rows.forEach(r=>h[r.h]++);
+  const host=$("hours"), W=Math.max(260,host.clientWidth||400), H=170, m={l:30,r:6,t:8,b:22}, mx=niceMax(Math.max(1,...h)), bw=(W-m.l-m.r)/24;
+  let s=""; for(let i=0;i<=3;i++){const v=mx*i/3; const yy=H-m.b-v/mx*(H-m.t-m.b); s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${yy}" y2="${yy}" stroke="var(--grid)"/><text x="${m.l-5}" y="${yy+4}" text-anchor="end">${f0(v)}</text>`;}
+  for(let i=0;i<24;i++){ const bh=h[i]/mx*(H-m.t-m.b); s+=`<rect class="hb" data-i="${i}" x="${m.l+i*bw+1}" y="${H-m.b-bh}" width="${Math.max(1,bw-2)}" height="${bh}" rx="2" fill="var(--accent)" tabindex="0" aria-label="${i}:00, ${h[i]} complaints"/>`; if(i%6===0) s+=`<text x="${m.l+i*bw+bw/2}" y="${H-6}" text-anchor="middle">${String(i).padStart(2,"0")}h</text>`; }
+  host.innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Complaints by hour of day">${s}</svg>`;
+  host.querySelectorAll(".hb").forEach(el=>{const i=+el.dataset.i; tipFor(el,`<b>${String(i).padStart(2,"0")}:00–${String(i).padStart(2,"0")}:59</b><br>${h[i]} complaints`);});
+}
+
+/* ---------------- findings (rule-based early-warning) ---------------- */
+function findings(){
+  const out=[]; const all=D.rows.filter(r=>S.src<0||r.s===S.src);
+  // 1. spikes: weekly zone×category counts vs. their own median
+  const w0=weekIdx(D.min), w1=weekIdx(D.max), nw=w1-w0+1; const cell={};
+  all.forEach(r=>{const k=r.z+"-"+r.c; (cell[k]=cell[k]||Array(nw).fill(0))[weekIdx(r.d)-w0]++;});
+  const eps=[];
+  for(const [k,a] of Object.entries(cell)){
+    const med=quant(a,.5), thr=Math.max(6,med+Math.max(3,3*Math.sqrt(med)));
+    let i=0; while(i<nw){ if(a[i]>=thr){ let j=i,ex=0,tot=0; while(j<nw&&a[j]>=thr){ex+=a[j]-med;tot+=a[j];j++;} const [z,c]=k.split("-").map(Number); eps.push({z,c,from:Math.max(weekStart(w0+i),D.min),to:Math.min(weekStart(w0+j)-1,D.max),ex,tot,med,peak:Math.max(...a.slice(i,j))}); i=j; } else i++; }
+  }
+  eps.sort((a,b)=>b.ex-a.ex).slice(0,3).forEach(e=>out.push({sev:"crit",title:`Spike: ${nameC(e.c)} in ${nameZ(e.z)}`,
+    body:`${fmtDay(e.from)} – ${fmtDay(e.to)}: ${e.tot} complaints, peaking at ${e.peak} a week against a normal ${f1(e.med)}.`,
+    show:{from:e.from,to:e.to,zone:e.z,cat:e.c,preset:""}, ask:`Investigate the spike in ${D.cats[e.c]} complaints in ${D.zones[e.z].en} between ${isoDay(e.from)} and ${isoDay(e.to)}. What changed in volume, response time and satisfaction, and what should the decision owner do?`}));
+  // 2. slow service in the current period
+  const cur=pick({zone:-1,cat:-1}); const g={}; cur.forEach(r=>{(g[r.z+"-"+r.c]=g[r.z+"-"+r.c]||[]).push(r);});
+  if(D.hasRes) Object.entries(g).map(([k,a])=>({k,a,s:stats(a)})).filter(x=>x.s.resolved+x.s.open>=8&&x.s.sla!=null&&x.s.sla<70).sort((a,b)=>a.s.sla-b.s.sla).slice(0,2).forEach(x=>{
+    const [z,c]=x.k.split("-").map(Number);
+    out.push({sev:x.s.sla<50?"crit":"watch",title:`Slow service: ${nameC(c)} in ${nameZ(z)}`,body:`Only ${f0(x.s.sla)}% resolved within the ${D.sla[c]} h SLA (median ${f1(x.s.med)} h, ${x.s.overdue} overdue and open) in the selected period.`,
+      show:{zone:z,cat:c}, ask:`Why is ${D.cats[c]} in ${D.zones[z].en} missing its ${D.sla[c]} h SLA in the selected period? Compare with other zones and say when it started.`});
+  });
+  // 3. biggest rise vs prior period
+  const pr=prevRange();
+  if(pr){ const a=pick({zone:-1,cat:-1}), b=pick({...pr,zone:-1,cat:-1}); const ca=D.cats.map(()=>0), cb=D.cats.map(()=>0); a.forEach(r=>ca[r.c]++); b.forEach(r=>cb[r.c]++);
+    const best=D.cats.map((_,i)=>({i,d:ca[i]-cb[i],p:cb[i]?(ca[i]-cb[i])/cb[i]*100:null})).filter(x=>ca[x.i]>=15&&x.p!=null&&x.p>=25).sort((x,y)=>y.p-x.p)[0];
+    if(best) out.push({sev:"watch",title:`Rising: ${nameC(best.i)}`,body:`Up ${f0(best.p)}% on the prior period (${cb[best.i]} → ${ca[best.i]} complaints).`,show:{cat:best.i,zone:-1},ask:`${D.cats[best.i]} complaints are up ${f0(best.p)}% versus the prior period. Which zones drive the increase, and is it a trend or a one-off?`}); }
+  // 4. backlog
+  const st=stats(pick({zone:-1,cat:-1}));
+  if(D.hasRes && st.overdue>0){ const o=D.cats.map(()=>0); pick({zone:-1,cat:-1}).forEach(r=>{ if(r.r==null&&(D.end-r.ts)/36e5>D.sla[r.c]) o[r.c]++; }); const top=o.indexOf(Math.max(...o));
+    out.push({sev:st.overdue>=10?"crit":"watch",title:`${st.overdue} open complaints are past their SLA`,body:`Most overdue: ${nameC(top)} (${o[top]}). Close these first to protect compliance and satisfaction.`,show:{cat:top,zone:-1},ask:`List where the ${st.overdue} overdue open complaints are concentrated by zone and category, and suggest a triage order.`}); }
+  if(!out.length) out.push({sev:"ok",title:"Nothing unusual detected",body:"No spikes, slow-service cells or large rises in the current period.",ask:"Give me a short weekly brief of this view."});
+  return out;
+}
+function renderFindings(){
+  const list=findings(); const lab={crit:"● Critical",watch:"▲ Watch",ok:"✓ Normal"}; const cls={crit:"crit",watch:"watch",ok:"ok"};
+  $("paneF").innerHTML=`<p class="empty" style="margin-bottom:10px">Rules run on the whole dataset: weekly spikes per zone and category, SLA misses, rises, and overdue backlog.</p>`+list.map((f,i)=>`<div class="finding"><span class="pill ${cls[f.sev]}" style="align-self:flex-start">${lab[f.sev]}</span><h3>${esc(f.title)}</h3><p>${esc(f.body)}</p><div class="acts">${f.show?`<button class="btn" data-show="${i}">Show on dashboard</button>`:""}<button class="btn primary" data-ask="${i}">Ask Cohere</button></div></div>`).join("");
+  $("paneF").querySelectorAll("[data-show]").forEach(b=>b.onclick=()=>{ const f=list[+b.dataset.show].show; if(f.from!=null){S.preset="";} setF(f); window.scrollTo({top:0,behavior:"smooth"}); });
+  $("paneF").querySelectorAll("[data-ask]").forEach(b=>b.onclick=()=>{ selectTab("chat"); sendMsg(list[+b.dataset.ask].ask); });
+}
+
+/* ---------------- filters ---------------- */
+function setF(p){ if("from" in p||"to" in p){ if(!("preset" in p)) S.preset=""; } Object.assign(S,p); delete S.preset_; syncControls(); renderAll(); }
+function syncControls(){
+  $("fFrom").value=isoDay(S.from); $("fTo").value=isoDay(S.to); $("fFrom").min=$("fTo").min=isoDay(D.min); $("fFrom").max=$("fTo").max=isoDay(D.max);
+  $("fZone").value=S.zone; $("fCat").value=S.cat; $("fSrc").value=S.src;
+  $("presets").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===S.preset)));
+  $("slaSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===S.sla)));
+  $("rangeLabel").textContent=fmtDayY(S.from)+" – "+fmtDayY(S.to);
+}
+function fillSelects(){
+  $("fZone").innerHTML=`<option value="-1">All zones</option>`+D.zones.map((z,i)=>`<option value="${i}">${esc(nameZ(i))}</option>`).join("");
+  $("fCat").innerHTML=`<option value="-1">All categories</option>`+D.cats.map((c,i)=>`<option value="${i}">${esc(nameC(i))}</option>`).join("");
+  $("fSrc").innerHTML=`<option value="-1">All sources</option>`+D.srcs.map((c,i)=>`<option value="${i}">${esc(c)}</option>`).join("");
+  $("fSrc").closest(".f").hidden=D.srcs.length<2;
+}
+function preset(p){ S.preset=p; S.to=D.max; S.from=p==="0"?D.min:Math.max(D.min,D.max-(+p)+1); }
+function resetAll(){ S.zone=-1;S.cat=-1;S.src=-1; preset("30"); syncControls(); renderAll(); }
+
+function renderAll(){
+  kpis(); trend(); catRows(); zoneRows(); slaRows(); heatmap(); hours(); renderFindings();
+  const q=$("chips"); if(!q.dataset.done){ q.dataset.done=1; renderChips(); }
+}
+
+/* ---------------- Cohere analytics assistant ---------------- */
+let sample=null, turns=[], busy=false, ctl=null, toolsOk=false;
+const RULES=`You are the analytics assistant inside a complaints dashboard for a city district (Oasis District; the sample data is synthetic and for training only). A decision owner (e.g. a service-operations lead) reads your answers.
+Rules:
+- Answer from the dashboard context below and from the query_complaints tool. Never invent numbers. If a figure isn't available, say so or query it.
+- Lead with the answer, then 2-4 supporting numbers. Keep it short: under 150 words unless asked for a brief or report.
+- Separate what the data shows from hypotheses about causes, and label hypotheses as such. Flag small samples (n < 10) and the fact that rating (CSAT) data covers only some complaints.
+- When useful, end with one concrete next action and who should own it.
+- Use plain text with short bullets and **bold** for key numbers. Reply in the language the user writes in (Arabic or English).
+- SLA = hours allowed to resolve a complaint, per category. Overdue = still open and older than its SLA at the data cut-off.`;
+function ctxSummary(){
+  const rows=pick(), st=stats(rows), pr=prevRange(), ps=pr?stats(pick(pr)):null;
+  const by=(keyN,keyFn,names)=>names.map((nm,i)=>{const s=stats(rows.filter(r=>keyFn(r)===i)); return {name:nm,n:s.n,open:s.open,overdue:s.overdue,sla_pct:s.sla==null?null:+s.sla.toFixed(1),median_h:s.med==null?null:+s.med.toFixed(1),csat:s.csat==null?null:+s.csat.toFixed(2)};});
+  const wk={}; rows.forEach(r=>{const w=weekIdx(r.d); wk[w]=(wk[w]||0)+1;});
+  return JSON.stringify({dataset:{source:D.isSeed?"synthetic sample (Oasis District)":"user-uploaded CSV",coverage:isoDay(D.min)+" to "+isoDay(D.max),cut_off:isoDay(Math.floor(D.end/DAY)),rows:D.rows.length,category_sla_hours:Object.fromEntries(D.cats.map((c,i)=>[c,D.sla[i]]))},
+    filters:{from:isoDay(S.from),to:isoDay(S.to),zone:S.zone<0?"all":D.zones[S.zone].en,category:S.cat<0?"all":D.cats[S.cat],source:S.src<0?"all":D.srcs[S.src]},
+    kpis:{complaints:st.n,open:st.open,overdue_open:st.overdue,sla_pct:st.sla==null?null:+st.sla.toFixed(1),sla_target_pct:TARGETS.sla,median_resolution_h:st.med==null?null:+st.med.toFixed(1),p90_h:st.p90==null?null:+st.p90.toFixed(1),csat:st.csat==null?null:+st.csat.toFixed(2),csat_responses:st.qn},
+    prior_period:ps?{complaints:ps.n,sla_pct:ps.sla==null?null:+ps.sla.toFixed(1),median_resolution_h:ps.med==null?null:+ps.med.toFixed(1),csat:ps.csat==null?null:+ps.csat.toFixed(2)}:null,
+    by_category:by("c",r=>r.c,D.cats),by_zone:by("z",r=>r.z,D.zones.map(z=>z.en)),
+    weekly_counts:Object.entries(wk).map(([w,n])=>[isoDay(Math.max(weekStart(+w),S.from)),n]),
+    auto_findings:findings().map(f=>f.title+" — "+f.body)});
+}
+function agg(rows,keyFn){
+  const g=new Map(); rows.forEach(r=>{const k=keyFn(r); if(!g.has(k)) g.set(k,[]); g.get(k).push(r);});
+  return [...g.entries()].map(([k,a])=>{const s=stats(a); return {key:k,count:s.n,open:s.open,overdue_open:s.overdue,sla_pct:s.sla==null?null:+s.sla.toFixed(1),median_h:s.med==null?null:+s.med.toFixed(1),p90_h:s.p90==null?null:+s.p90.toFixed(1),csat:s.csat==null?null:+s.csat.toFixed(2),csat_n:s.qn};});
+}
+function findIdx(list,val,get){ if(val==null||val==="") return -1; const v=String(val).toLowerCase(); const i=list.findIndex(x=>get(x).some(s=>s&&String(s).toLowerCase()===v)); if(i<0) throw new Error("Unknown value '"+val+"'. Valid: "+list.map(x=>get(x)[0]).join(", ")); return i; }
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function queryTool(a){
+  const z=findIdx(D.zones,a.zone,x=>[x.id,x.en,x.ar]); const c=findIdx(D.cats.map((n,i)=>({n,ar:D.catsAr[i]})),a.category,x=>[x.n,x.ar]); const s=findIdx(D.srcs,a.source,x=>[x]);
+  const from=a.from?parseIso(String(a.from)):D.min, to=a.to?parseIso(String(a.to)):D.max; if(isNaN(from)||isNaN(to)) throw new Error("Dates must be YYYY-MM-DD");
+  const rows=pick({from,to,zone:z,cat:c,src:s}); const gb=a.group_by||"category";
+  const keys={category:r=>D.cats[r.c],zone:r=>D.zones[r.z].en,zone_category:r=>D.zones[r.z].en+" / "+D.cats[r.c],week:r=>isoDay(Math.max(weekStart(weekIdx(r.d)),from)),day:r=>isoDay(r.d),hour:r=>String(r.h).padStart(2,"0")+":00",weekday:r=>WD[(r.d+4)%7],source:r=>D.srcs[r.s],none:()=>"all"};
+  if(!keys[gb]) throw new Error("group_by must be one of: "+Object.keys(keys).join(", "));
+  let out=agg(rows,keys[gb]); if(["week","day","hour"].includes(gb)) out.sort((x,y)=>x.key<y.key?-1:1); else out.sort((x,y)=>y.count-x.count);
+  const lim=Math.min(+a.limit||40,60); return {filters_applied:{from:isoDay(from),to:isoDay(to),zone:z<0?"all":D.zones[z].en,category:c<0?"all":D.cats[c],source:s<0?"all":D.srcs[s]},total_rows:rows.length,groups:out.length,rows:out.slice(0,lim)};
+}
+const TOOLS=[{name:"query_complaints",description:"Aggregate the FULL complaints dataset (independent of dashboard filters) and return count, open, overdue_open, sla_pct, median_h, p90_h, csat per group. Use it to drill into a zone, category, week, hour or date window before answering.",
+  inputSchema:{type:"object",properties:{group_by:{type:"string",enum:["category","zone","zone_category","week","day","hour","weekday","source","none"],description:"How to group the rows"},zone:{type:"string",description:"Optional zone id (Z01..) or English name"},category:{type:"string",description:"Optional category, English or Arabic name"},source:{type:"string",description:"Optional source system"},from:{type:"string",description:"Optional start date YYYY-MM-DD"},to:{type:"string",description:"Optional end date YYYY-MM-DD"},limit:{type:"number",description:"Max rows, default 40"}},required:["group_by"]},
+  execute:a=>queryTool(a||{})}];
+
+const ERR={not_granted:"Claude access for this page was declined. Reload and allow it to use the assistant.",sampling_disabled:"Claude isn't available for this account.",rate_limited:"Too many requests or usage limit reached. Try again in a few minutes.",session_expired:"Your session expired. Sign in again.",refused:"Claude couldn't answer that request. Try rephrasing it.",empty_completion:"No answer came back. Try a more specific question.",prompt_too_large:"That question is too large. Try asking about a narrower slice.",upstream_error:"Something interrupted the answer. Try again."};
+function md(t){
+  const L=esc(t).split("\n"); let h="",inList=false;
+  const inl=s=>s.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/`([^`]+)`/g,"<code>$1</code>");
+  for(const raw of L){ const l=raw.trim(); const li=l.match(/^([-*•]|\d+[.)])\s+(.*)/);
+    if(li){ if(!inList){h+="<ul>";inList=true;} h+="<li>"+inl(li[2])+"</li>"; }
+    else { if(inList){h+="</ul>";inList=false;} if(!l) continue; const hd=l.match(/^#{1,4}\s+(.*)/); h+="<p>"+(hd?"<strong>"+inl(hd[1])+"</strong>":inl(l))+"</p>"; } }
+  return h+(inList?"</ul>":"");
+}
+function addMsg(cls,html){ const d=document.createElement("div"); d.className="m "+cls; d.dir="auto"; d.innerHTML=html; $("msgs").append(d); $("msgs").scrollTop=$("msgs").scrollHeight; return d; }
+function renderChips(){
+  const qs=["What needs attention first this week?","Why is SLA low, and where?","Summarize this view as a weekly brief","What happened with water leaks in May?","ما أكثر منطقة تحتاج تدخلًا؟"];
+  $("chips").innerHTML=""; qs.forEach(q=>{const b=document.createElement("button"); b.className="chip"; b.textContent=q; b.onclick=()=>sendMsg(q); $("chips").append(b);});
+}
+async function sendMsg(text){
+  text=(text||"").trim(); if(!text||busy) return;
+  busy=true; $("send").disabled=true; $("stop").hidden=false; $("q").value=""; $("chips").hidden=true;
+  addMsg("u",esc(text)); turns.push({role:"user",content:text});
+  const bub=addMsg("a",'<span class="thinking">Checking the database and asking Cohere…</span>'); ctl=new AbortController();
+  const filters={
+    from: isoDay(S.from),
+    to: isoDay(S.to),
+    district: S.zone >= 0 ? D.zones[S.zone].id : null,
+    category: S.cat >= 0 ? D.cats[S.cat] : null
+  };
+  try{
+    const response=await fetch(`${API_BASE_URL}/api/v1/analytics/ask`,{
+      method:"POST", headers:{"Content-Type":"application/json"}, signal:ctl.signal,
+      body:JSON.stringify({question:text,language:S.lang,filters})
+    });
+    const data=await response.json();
+    if(!response.ok) throw new Error(typeof data.detail==="string"?data.detail:`Analytics request failed (${response.status})`);
+    const answer=String(data.reply||"").trim();
+    if(!answer) throw new Error("The analytics assistant returned an empty answer.");
+    bub.innerHTML=md(answer); turns.push({role:"assistant",content:answer});
+  }catch(e){
+    if(e&&e.name==="AbortError"){bub.innerHTML='<p class="err">Request stopped.</p>';}
+    else {bub.innerHTML=`<p class="err">${esc(e&&e.message?e.message:"Could not reach the analytics API. Check that FastAPI is running.")}</p>`; turns.pop();}
+  } finally {busy=false; $("send").disabled=false; $("stop").hidden=true; ctl=null; $("msgs").scrollTop=$("msgs").scrollHeight;}
+}
+function selectTab(t){ const c=t==="chat"; $("tabC").setAttribute("aria-selected",c); $("tabF").setAttribute("aria-selected",!c); $("paneC").hidden=!c; $("paneF").hidden=c; if(c) $("q").focus({preventScroll:true}); }
+
+/* ---------------- CSV loader ---------------- */
+function parseCSV(t){ const rows=[]; let row=[],f="",q=false; t=t.replace(/^﻿/,"");
+  for(let i=0;i<t.length;i++){ const c=t[i];
+    if(q){ if(c==='"'){ if(t[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true; else if(c===","){row.push(f);f="";} else if(c==="\n"||c==="\r"){ if(c==="\r"&&t[i+1]==="\n") i++; row.push(f);f=""; if(row.some(x=>x!=="")) rows.push(row); row=[]; } else f+=c; }
+  if(f!==""||row.length){row.push(f); rows.push(row);} return rows; }
+function parseDT(s){ s=String(s||"").trim(); let m=s.match(/(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/); if(m) return Date.UTC(+m[1],+m[2]-1,+m[3],+(m[4]||12),+(m[5]||0));
+  m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{2}):(\d{2}))?/); if(m) return Date.UTC(+m[3],+m[2]-1,+m[1],+(m[4]||12),+(m[5]||0)); return NaN; }
+const CANON={"تسرب المياه":"تسرب مياه","تسريب مياه":"تسرب مياه","water leak":"تسرب مياه","مياه":"تسرب مياه"};
+const DISTRICT_NAMES = {
+  district_1: {
+    en: "First Residential District",
+    ar: "الحي السكني الأول"
+  },
+  district_2: {
+    en: "Second Residential District",
+    ar: "الحي السكني الثاني"
+  },
+  district_3: {
+    en: "Third Residential District",
+    ar: "الحي السكني الثالث"
+  },
+  district_4: {
+    en: "Fourth Residential District",
+    ar: "الحي السكني الرابع"
+  },
+  district_5: {
+    en: "Fifth Residential District",
+    ar: "الحي السكني الخامس"
+  },
+  government_district: {
+    en: "Government District",
+    ar: "الحي الحكومي"
+  }
+};
+
+function normalizeDistrictId(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "unknown";
+
+  // Already a known stable ID.
+  if (DISTRICT_NAMES[raw]) return raw;
+
+  // Support older records containing English or Arabic labels.
+  const normalized = raw.toLocaleLowerCase();
+
+  for (const [id, labels] of Object.entries(DISTRICT_NAMES)) {
+    if (
+      normalized === labels.en.toLocaleLowerCase() ||
+      raw === labels.ar
+    ) {
+      return id;
+    }
+  }
+
+  // Preserve unrecognized legacy values rather than discarding them.
+  return raw;
+}
+function loadCSV(text){
+  const t=parseCSV(text); if(t.length<2) throw new Error("The file has no data rows.");
+  const h=t[0].map(x=>x.trim().toLowerCase()); const col=(...n)=>h.findIndex(x=>n.includes(x));
+  const iC=col("created_at","created","timestamp","date","opened_at"), iZ=col("zone_id","zone"), iK=col("category","category_en","true_category","type"), iR=col("resolved_at","closed_at"), iH=col("resolution_hours","resolution_h"), iQ=col("satisfaction","csat","rating"), iS=col("source_system","source"), iStatus=col("status","complaint_status");
+  if(iC<0) throw new Error("Needs a created_at column."); if(iK<0) throw new Error("Needs a category column.");
+  const ds={cats:SEED.cats.slice(),catsAr:SEED.cats_ar.slice(),sla:SEED.sla.slice(),zones:[],srcs:[],rows:[],isSeed:false};
+  const zi=new Map(), si=new Map(); let skipped=0;
+  for(let i=1;i<t.length;i++){ const r=t[i]; const ms=parseDT(r[iC]); if(isNaN(ms)){skipped++;continue;}
+    let k=(r[iK]||"").trim(); if(!k){skipped++;continue;} k=CANON[k]||CANON[k.toLowerCase()]||k;
+    let c=ds.catsAr.indexOf(k); if(c<0) c=ds.cats.findIndex(x=>x.toLowerCase()===k.toLowerCase()); if(c<0){ ds.cats.push(k); ds.catsAr.push(""); ds.sla.push(48); c=ds.cats.length-1; }
+    
+const rawZone = iZ >= 0
+  ? ((r[iZ] || "").trim() || "—")
+  : "All";
+
+const zid = normalizeDistrictId(rawZone);
+
+if (!zi.has(zid)) {
+  const known = SEED.zones.find(z => z[0] === zid);
+  const district = DISTRICT_NAMES[zid];
+
+  zi.set(zid, ds.zones.length);
+
+  ds.zones.push({
+    id: zid,
+    en: district?.en || known?.[1] || zid,
+    ar: district?.ar || known?.[2] || ""
+  });
+}
+
+    const sid=iS>=0?(r[iS]||"").trim()||"unknown":"all"; if(!si.has(sid)){si.set(sid,ds.srcs.length); ds.srcs.push(sid);}
+    let res=null; if(iH>=0&&r[iH]!==""&&!isNaN(+r[iH])) res=+r[iH]; else if(iR>=0&&r[iR]){ const e=parseDT(r[iR]); if(!isNaN(e)) res=Math.max(0,(e-ms)/36e5); }
+    const q=iQ>=0&&r[iQ]!==""&&!isNaN(+r[iQ])?+r[iQ]:null; const d=Math.floor(ms/DAY);
+    ds.rows.push({id:"R"+i,d,h:new Date(ms).getUTCHours(),ts:ms,z:zi.get(zid),c,s:si.get(sid),r:res,q,status:iStatus>=0?(r[iStatus]||"received"):null});
+  }
+  if(!ds.rows.length) throw new Error("No usable rows. Check the date format (YYYY-MM-DD HH:MM or DD/MM/YYYY).");
+  ds.rows.sort((a,b)=>a.ts-b.ts); ds.hasResCols=iR>=0||iH>=0;
+  finalize(ds); if(!ds.hasResCols) ds.hasRes=false; ds.skipped=skipped; return ds;
+}
+function useDataset(ds){
+  D=ds; S.zone=S.cat=S.src=-1; preset("30"); turns=[]; $("msgs").innerHTML=""; greet(); fillSelects(); syncControls();
+  const b=$("banner");
+  if(D.sourceLabel){
+    $("dataBadge").textContent=D.sourceLabel;
+    b.hidden=false;
+    b.innerHTML=`<span><strong>Live database:</strong> ${f0(D.rows.length)} complaints, ${fmtDayY(D.min)} – ${fmtDayY(D.max)}. ${D.hasRes?"Resolution metrics are available.":"Resolution-time, SLA and satisfaction metrics are not shown because the database does not currently store the required fields."}</span>`;
+  } else if(D.isSeed){ b.hidden=true; $("dataBadge").textContent="Synthetic data · for training only"; }
+  else { b.hidden=false; $("dataBadge").textContent="Your CSV"; b.innerHTML=`<span><strong>Showing your file:</strong> ${f0(D.rows.length)} complaints, ${fmtDayY(D.min)} – ${fmtDayY(D.max)}${D.skipped?`, ${D.skipped} rows skipped`:""}.${D.hasRes?"":" No resolved_at or resolution_hours column, so SLA metrics are hidden."}</span><button class="linkbtn" id="back">Back to sample data</button>`; $("back").onclick=()=>useDataset(SEEDDS); }
+  renderAll();
+}
+function greet(){ addMsg("a",`<p>Ask me about what you see: spikes, slow zones, SLA misses, backlog. I read the current filters and can query the full dataset.</p>`); $("chips").hidden=false; }
+
+/* ---------------- boot ---------------- */
+let SEEDDS=null;
+function init(){
+  SEEDDS=loadSeed();
+  $("presets").onclick=e=>{const b=e.target.closest("button"); if(!b) return; preset(b.dataset.p); syncControls(); renderAll();};
+  $("fFrom").onchange=e=>{ if(e.target.value) setF({from:Math.min(parseIso(e.target.value),S.to)}); };
+  $("fTo").onchange=e=>{ if(e.target.value) setF({to:Math.max(parseIso(e.target.value),S.from)}); };
+  $("fZone").onchange=e=>setF({zone:+e.target.value}); $("fCat").onchange=e=>setF({cat:+e.target.value}); $("fSrc").onchange=e=>setF({src:+e.target.value});
+  $("reset").onclick=resetAll;
+  $("slaSeg").onclick=e=>{const b=e.target.closest("button"); if(!b) return; S.sla=b.dataset.v; syncControls(); slaRows();};
+  $("trendToggle").onclick=()=>{S.table=!S.table; $("trendToggle").textContent=S.table?"View as chart":"View as table"; trend();};
+  const setLang=l=>{S.lang=l; $("langEn").setAttribute("aria-pressed",l==="en"); $("langAr").setAttribute("aria-pressed",l==="ar"); const z=S.zone,c=S.cat; fillSelects(); S.zone=z;S.cat=c; syncControls(); renderAll();};
+  $("langEn").onclick=()=>setLang("en"); $("langAr").onclick=()=>setLang("ar");
+  $("tabF").onclick=()=>selectTab("findings"); $("tabC").onclick=()=>selectTab("chat");
+  $("send").onclick=()=>sendMsg($("q").value); $("stop").onclick=()=>ctl&&ctl.abort();
+  $("q").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault(); sendMsg($("q").value);} });
+  $("csvFile").onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ useDataset(loadCSV(await f.text())); }catch(err){ const b=$("banner"); b.hidden=false; b.innerHTML=`<span><strong>Couldn't read that file.</strong> ${esc(err.message)} Expected columns: created_at, category, and optionally zone_id, resolved_at or resolution_hours, satisfaction, source_system.</span>`; } e.target.value=""; };
+  let rt; new ResizeObserver(()=>{clearTimeout(rt); rt=setTimeout(()=>{ if(D){trend();hours();} },80);}).observe(document.querySelector(".wrap"));
+  loadLiveData();
+}
+
+async function loadLiveData() {
+  const badge = $("dataBadge");
+  badge.textContent = "Connecting to PostgreSQL…";
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/analytics/complaints`,
+      { headers: { Accept: "application/json" } }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.detail || `API returned ${response.status}`);
+    }
+
+    const categoryNames = {
+      lighting: "Street lighting",
+      roads: "Roads and pavements",
+      waste: "Waste build-up",
+      water: "Water leak",
+      parking: "Parking violations",
+      noise: "Noise",
+      other: "Other complaint"
+    };
+
+    const csvCell = value => {
+      const text = String(value ?? "");
+      return '"' + text.replace(/"/g, '""') + '"';
+    };
+
+    const lines = [
+      ["created_at", "category", "zone_id", "status", "source_system"].join(",")
+    ];
+
+    for (const row of data.complaints || []) {
+      if (!row.created_at || !row.category) continue;
+
+      // Prefer the stable district ID returned by the backend.
+      const districtId = row.district_id || row.district || "unknown";
+
+      lines.push([
+        row.created_at,
+        categoryNames[row.category] || row.category,
+        districtId,
+        row.status || "received",
+        "Portal"
+      ].map(csvCell).join(","));
+    }
+
+    if (lines.length === 1) {
+      throw new Error("The database has no complaints yet.");
+    }
+
+    const ds = loadCSV(lines.join("\n"));
+    ds.sourceLabel = "Live PostgreSQL";
+    ds.apiCount = Number(data.count || ds.rows.length);
+
+    useDataset(ds);
+
+    $("chatNote").textContent =
+      "Cohere answers questions using live database aggregates and the selected filters.";
+
+  } catch (err) {
+    useDataset(SEEDDS);
+
+    const banner = $("banner");
+    banner.hidden = false;
+    banner.innerHTML =
+      `<span><strong>Could not load live database data.</strong> ${
+        esc(err && err.message ? err.message : "Could not connect to the API.")
+      } The dashboard is showing clearly labeled synthetic demo data. Start FastAPI and refresh to load PostgreSQL data.</span>`;
+
+    $("dataBadge").textContent = "Demo data · API unavailable";
+    $("chatNote").textContent =
+      "Cohere insights require the FastAPI backend and a configured COHERE_API_KEY.";
+  }
+}
+
+init();
+})();
+</script>

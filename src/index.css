@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Cairo", "Segoe UI", Tahoma, Arial, sans-serif;
+  color: #1D1616;
+  background: #F7F6F6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input, select, textarea { font: inherit; }
+::selection { background: #D84040; color: white; }
+.field {
+  width: 100%;
+  border: 1px solid #E4DEDE;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #1D1616;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.field:focus { border-color: #D84040; box-shadow: 0 0 0 3px rgba(216,64,64,.12); }
+.field::placeholder { color: #A59B9B; }

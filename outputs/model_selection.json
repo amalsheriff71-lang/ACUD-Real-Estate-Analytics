@@ -1,0 +1,194 @@
+{
+  "available_inventory": {
+    "12m": {
+      "model": "last_value",
+      "mape": 3.89,
+      "best_baseline": "last_value",
+      "baseline_mape": 3.89,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 4.73,
+      "ml_beats_baseline": false,
+      "usable": true
+    },
+    "3m": {
+      "model": "snaive12",
+      "mape": 1.3,
+      "best_baseline": "snaive12",
+      "baseline_mape": 1.3,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 7.12,
+      "ml_beats_baseline": false,
+      "usable": true
+    },
+    "6m": {
+      "model": "snaive12",
+      "mape": 4.91,
+      "best_baseline": "snaive12",
+      "baseline_mape": 4.91,
+      "best_ml_model": "ridge_egypt",
+      "ml_mape": 7.02,
+      "ml_beats_baseline": false,
+      "usable": true
+    }
+  },
+  "collections_egp": {
+    "12m": {
+      "model": "ridge_fourier",
+      "mape": 16.0,
+      "best_baseline": "ma3",
+      "baseline_mape": 19.57,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 16.0,
+      "ml_beats_baseline": true,
+      "usable": true
+    },
+    "3m": {
+      "model": "last_value",
+      "mape": 4.93,
+      "best_baseline": "last_value",
+      "baseline_mape": 4.93,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 9.95,
+      "ml_beats_baseline": false,
+      "usable": true
+    },
+    "6m": {
+      "model": "snaive12_growth",
+      "mape": 7.55,
+      "best_baseline": "snaive12_growth",
+      "baseline_mape": 7.55,
+      "best_ml_model": "ridge_egypt",
+      "ml_mape": 9.58,
+      "ml_beats_baseline": false,
+      "usable": true
+    }
+  },
+  "construction_cost_egp": {
+    "12m": {
+      "model": "ridge_fourier",
+      "mape": 13.27,
+      "best_baseline": "last_value",
+      "baseline_mape": 19.78,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 13.27,
+      "ml_beats_baseline": true,
+      "usable": true
+    },
+    "3m": {
+      "model": "last_value",
+      "mape": 1.48,
+      "best_baseline": "last_value",
+      "baseline_mape": 1.48,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 9.72,
+      "ml_beats_baseline": false,
+      "usable": true
+    },
+    "6m": {
+      "model": "ma3",
+      "mape": 11.12,
+      "best_baseline": "ma3",
+      "baseline_mape": 11.12,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 15.69,
+      "ml_beats_baseline": false,
+      "usable": true
+    }
+  },
+  "electricity_kwh": {
+    "12m": {
+      "model": "snaive12_growth",
+      "mape": 16.58,
+      "best_baseline": "snaive12_growth",
+      "baseline_mape": 16.58,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 20.23,
+      "ml_beats_baseline": false,
+      "usable": true
+    },
+    "3m": {
+      "model": "ridge_fourier",
+      "mape": 18.9,
+      "best_baseline": "snaive12_growth",
+      "baseline_mape": 26.71,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 18.9,
+      "ml_beats_baseline": true,
+      "usable": true
+    },
+    "6m": {
+      "model": "last_value",
+      "mape": 20.33,
+      "best_baseline": "last_value",
+      "baseline_mape": 20.33,
+      "best_ml_model": "ridge_egypt",
+      "ml_mape": 26.26,
+      "ml_beats_baseline": false,
+      "usable": true
+    }
+  },
+  "sales_value_egp": {
+    "12m": {
+      "model": "ridge_egypt",
+      "mape": 15.6,
+      "best_baseline": "snaive12_growth",
+      "baseline_mape": 16.5,
+      "best_ml_model": "ridge_egypt",
+      "ml_mape": 15.6,
+      "ml_beats_baseline": true,
+      "usable": true
+    },
+    "3m": {
+      "model": "ma3",
+      "mape": 5.74,
+      "best_baseline": "ma3",
+      "baseline_mape": 5.74,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 10.3,
+      "ml_beats_baseline": false,
+      "usable": true
+    },
+    "6m": {
+      "model": "snaive12_growth",
+      "mape": 14.92,
+      "best_baseline": "snaive12_growth",
+      "baseline_mape": 14.92,
+      "best_ml_model": "ridge_egypt",
+      "ml_mape": 18.91,
+      "ml_beats_baseline": false,
+      "usable": true
+    }
+  },
+  "units_sold": {
+    "12m": {
+      "model": "ridge_egypt",
+      "mape": 12.22,
+      "best_baseline": "snaive12_growth",
+      "baseline_mape": 16.26,
+      "best_ml_model": "ridge_egypt",
+      "ml_mape": 12.22,
+      "ml_beats_baseline": true,
+      "usable": true
+    },
+    "3m": {
+      "model": "snaive12",
+      "mape": 5.32,
+      "best_baseline": "snaive12",
+      "baseline_mape": 5.32,
+      "best_ml_model": "ridge_fourier",
+      "ml_mape": 11.89,
+      "ml_beats_baseline": false,
+      "usable": true
+    },
+    "6m": {
+      "model": "snaive12",
+      "mape": 7.97,
+      "best_baseline": "snaive12",
+      "baseline_mape": 7.97,
+      "best_ml_model": "ridge_egypt",
+      "ml_mape": 17.25,
+      "ml_beats_baseline": false,
+      "usable": true
+    }
+  }
+}

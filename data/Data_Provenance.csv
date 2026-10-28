@@ -1,0 +1,14 @@
+Dataset,Provenance_Type,Generation_or_Source,Data_Status,Notes
+Dim_Date.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Dim_District.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Dim_Developer.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Dim_Project.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Dim_Unit.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Dim_Price_Index.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Fact_Sales.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Fact_Inventory_Monthly.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Fact_Collections_Monthly.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Fact_Construction_Monthly.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Fact_District_Monthly_Status.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Fact_Utilities_Monthly.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv
+Anomaly_Ground_Truth.csv,Synthetic simulation,generate_nac_data.py (seed 42),Synthetic,Not real capital data; archetype districts; see Seasonality_Assumptions.csv

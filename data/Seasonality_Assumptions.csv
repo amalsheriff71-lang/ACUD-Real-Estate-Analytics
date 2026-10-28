@@ -1,0 +1,18 @@
+Parameter,Value,Note
+Weekend,"Friday-Saturday weekend; sales multiplier Fri 0.35, Sat 0.55",Egyptian working week
+Ramadan,"Sales multiplier 0.65 (dates move ~11 days earlier each year: 2024-03-11, 2025-03-01, 2026-02-18)",Moving lunar calendar; dates approximate +-1 day
+Eid al-Fitr / al-Adha,Sales multiplier 0.40; +15% for the 14 days after,Approximate dates
+Summer expatriate season,"Jul 1.18, Aug 1.20",Assumption
+Launch season,"Sep 1.25, Oct 1.25, Nov 1.08",Assumption
+Winter,"Jan 0.92, Feb 0.92",Assumption
+Public holidays,"Jan 7, Jan 25, Apr 25, May 1, Jun 30, Jul 23, Oct 6 -> sales x0.40",Fixed-date holidays only
+Underlying demand trend,+0.6% per month,Assumption
+Price index drift,+1.3% per month nominal on list prices and construction costs,Assumption
+Price elasticity,hazard x exp(-1.8 * ln(unit price / type benchmark)),Assumption
+Unit listing age,"hazard x exp(-0.0012 * days on market, capped at 700)",Assumption
+Cairo climate,"Monthly mean temperature 14C (Jan) to 30C (Jul-Aug) + N(0, 0.8) noise",Approximate climatology
+Electricity,"per occupied unit: 220 + 1.1*CDD(24C) + 0.5*HDD(18C) kWh/month, x1.12 common areas",Assumption
+Collections seasonality,Installments due in Ramadan/Eid pay later (delay x1.4 + 6 days),Assumption
+Cancellations,daily hazard 0.00012 between day 14 and 365 after sale (~4%/yr),Assumption
+Collections,dp at sale + quarterly installments; delay ~ Exp(6+40*(1-developer quality)) days; 1.5% default,Assumption
+Calibration,base daily hazard=0.00536 calibrated to ~2900 new sales in the window,"Seeded, reproducible"

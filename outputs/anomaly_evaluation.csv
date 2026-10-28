@@ -1,0 +1,6 @@
+event_label,n_true_entities,n_entities_tested,entity_TP,entity_FP,entity_FN,entity_precision,entity_recall,entity_F1,month_TP,month_FP,month_FN,month_precision,month_recall,month_F1,mean_detection_delay_months
+sales_drop,2,40,1,5,1,0.167,0.5,0.25,2,7,4,0.222,0.333,0.267,1.0
+cost_overrun,2,30,2,2,0,0.5,1.0,0.667,6,2,0,0.75,1.0,0.857,0.0
+construction_delay,1,30,1,0,0,1.0,1.0,1.0,4,0,0,1.0,1.0,1.0,0.0
+inventory_spike,1,40,1,0,0,1.0,1.0,1.0,1,0,0,1.0,1.0,1.0,0.0
+collections_drop,2,10,2,0,0,1.0,1.0,1.0,6,0,0,1.0,1.0,1.0,0.0

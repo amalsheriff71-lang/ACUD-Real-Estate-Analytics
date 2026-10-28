@@ -1,0 +1,72 @@
+﻿# Secrets and local environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# JavaScript / frontend dependencies
+node_modules/
+.npm/
+dist/
+build/
+coverage/
+
+# Editors and operating systems
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# Local databases and database backups
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.bak
+
+# Local virtual machines and large archives
+*.7z
+*.rar
+
+# Local configuration
+.python-version
+
+# Local environment secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
