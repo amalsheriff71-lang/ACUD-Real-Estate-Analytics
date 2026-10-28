@@ -5,7 +5,7 @@ from sqlalchemy import text
 from app.categories import CATEGORIES
 from app.config import get_settings
 from app.database import Base, engine
-from app.routers import analytics, chat, complaints, sales
+from app.routers import analytics, chat, complaints, sales , survey_sales
 from app import models  # noqa: F401 - registers SQLAlchemy models
 
 
@@ -38,7 +38,7 @@ app.include_router(complaints.router)
 app.include_router(chat.router)
 app.include_router(analytics.router)
 app.include_router(sales.router)
-
+app.include_router(survey_sales.router)
 
 @app.get("/")
 def root():

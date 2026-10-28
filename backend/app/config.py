@@ -6,7 +6,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://complaints_user:change_me@localhost:5432/capital_complaints"
     cohere_api_key: str = ""
     cohere_model: str = "command-a-03-2025"
-    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080",
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080,http://127.0.0.1:8081,http://localhost:8081"
+    
     auto_create_tables: bool = True
 
     model_config = SettingsConfigDict(
