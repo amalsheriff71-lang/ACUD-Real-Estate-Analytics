@@ -120,7 +120,7 @@ def dashboard(
             current = pd.to_numeric(survey[level], errors="coerce")
             valid = importance.notna() & current.notna()
             if valid.any():
-                service_gaps.append({"service": label, "importance": round(float(importance[valid].mean()), 2), "current_level": round(float(current[valid].mean()), 2), "gap": round(float((importance[valid] - current[valid]).mean()), 2)})
+                service_gaps.append({"service": label, "importance": round(float(importance[valid].mean()), 2), "current_level": round(float(current[valid].mean()), 2), "gap": round(float((importance[valid] - current[valid]).mean()), 2), "valid_responses": int(valid.sum()), "coverage_pct": round(float(valid.mean() * 100), 1)})
     service_gaps.sort(key=lambda x: x["gap"], reverse=True)
 
     as_of, sales_projects, sales_districts = _latest_sales(district_id, project_id)
