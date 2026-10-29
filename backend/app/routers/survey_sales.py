@@ -12,6 +12,7 @@ from sqlalchemy import inspect, text
 
 from app.config import get_settings
 from app.database import engine
+from app.analytics.service_gap import analyze as analyze_service_gap
 from app.routers.sales import _read
 
 router = APIRouter(prefix="/api/v1/survey-sales", tags=["Survey + sales intelligence"])
@@ -185,6 +186,30 @@ def dashboard(
     return result
 
 
+def _optional(name: str) -> pd.DataFrame | None:
+    """Read an optional context table; absence is reported as missing data, never as zero."""
+    try:
+        return _read(name)
+    except HTTPException:
+        return None
+
+
+@router.get("/service-gap")
+def service_gap(district_id: str | None = Query(default=None, min_length=2, max_length=32)):
+    """Validated service-gap analysis and evidence-graded recommendations (contract for the Executive Decision Agent).
+
+    Statistics are always computed on all districts (area-vs-rest comparisons need the rest);
+    `district_id` only narrows the returned findings and recommendations.
+    """
+    survey = _survey()
+    districts, projects = _read("Dim_District"), _read("Dim_Project")
+    return analyze_service_gap(
+        survey, districts, projects,
+        indicators=_optional("Fact_District_Service_Indicators"), status=_optional("Fact_District_Monthly_Status"),
+        funnel=_optional("Fact_Project_Sales_Funnel"), area_id=district_id,
+    )
+
+
 class SurveySalesQuestion(BaseModel):
     question: str = Field(min_length=2, max_length=3000)
     language: Literal["en", "ar"] = "en"
@@ -198,12 +223,15 @@ def ask(payload: SurveySalesQuestion):
     if not settings.cohere_api_key:
         raise HTTPException(status_code=503, detail="Cohere is not configured. Add COHERE_API_KEY to backend/.env.")
     evidence = dashboard(payload.district_id, payload.project_id)
+    gap = service_gap(payload.district_id)
+    evidence["validated_service_gap_analysis"] = {k: gap.get(k) for k in ("analysis_status", "data_mode", "service_priority", "commercial_context", "recommended_actions", "missing_data", "limitations")}
     system_prompt = (
         "You are ACUD's evidence-grounded survey and real-estate sales analyst. Answer in the requested language. "
         "Use only supplied dashboard data. Give 3 prioritized recommendations with owner, action, metric and review window. "
         "Separate observed facts from hypotheses; never claim causation from correlation. The dataset uses District_ID and Project_ID "
         "from the supplied sales dimensions; there is no separate Region_ID/Region_Name. All 1,000 survey responses are synthetic "
-        "demonstration data, not real customer evidence. Do not invent metrics; state if data is insufficient."
+        "demonstration data, not real customer evidence. Do not invent metrics; state if data is insufficient. "
+        "Quote statistics only from `validated_service_gap_analysis`; keep evidence_grade labels unchanged; label each statement as fact, hypothesis or recommendation."
     )
     try:
         client = cohere.ClientV2(api_key=settings.cohere_api_key)
