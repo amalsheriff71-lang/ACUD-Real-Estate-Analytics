@@ -178,7 +178,7 @@ const seg = (host, opts, cur, cb) => { host.innerHTML=opts.map(o=>`<button aria-
 const ramShades = (labels) => { const sh=[]; labels.forEach((l,i)=>{ if((D.ramadan_days[l]||0)>=10){ const p=sh[sh.length-1]; if(p&&p.i1===i-1) p.i1=i; else sh.push({i0:i,i1:i,label:'Ramadan'}); } }); return sh; };
 
 /* ---------- nav ---------- */
-const TABS=[['over','Overview & seasonality'],['fc','Forecasts'],['an','Anomaly detection'],['risk','Unsold risk (90 days)'],['sv','Customer intelligence'],['lim','Data, method & limits']];
+const TABS=[['over','Overview & seasonality'],['fc','Forecasts'],['an','Anomaly detection'],['risk','Unsold risk (90 days)'],['sv','Resident survey intelligence'],['lim','Data, method & limits']];
 $('#nav').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${t[0]}" aria-selected="${i==0}">${t[1]}</button>`).join('');
 $$('#nav button').forEach(b=>b.onclick=()=>{$$('#nav button').forEach(x=>x.setAttribute('aria-selected',x===b));$$('.tab').forEach(s=>s.classList.toggle('on',s.id==='t-'+b.dataset.t));location.hash=b.dataset.t;});
 $('#vbadge').textContent=`Data validation ${D.validation.pass}/${D.validation.total} rules pass`;
@@ -277,7 +277,7 @@ $('#theme').onclick=()=>{const r=document.documentElement; const dark=(r.dataset
 /* ---------- Customer intelligence: survey + sales integration ---------- */
 (function(){
   const h=$('#t-sv');
-  h.innerHTML=`<div class="card int-card">
+  h.innerHTML=`<div class="card int-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><div><h2 style="margin:0">Resident survey intelligence</h2><p class="int-note" style="margin:3px 0 0">This is the survey evidence view. Sales figures below are context for prioritizing areas, not proof that services caused weak sales.</p></div><a href="survey-dashboard.html" target="_blank" rel="noopener" style="color:var(--accent);font-weight:800;font-size:12px">Open survey-only story →</a></div>
     <div class="int-toolbar">
       <div class="int-field"><label for="sv-d">District</label><select id="sv-d"><option value="">All districts</option></select></div>
       <div class="int-field"><label for="sv-p">Project</label><select id="sv-p"><option value="">All projects</option></select></div>
