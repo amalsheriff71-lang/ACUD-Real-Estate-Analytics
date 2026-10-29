@@ -4,13 +4,11 @@ import { useState } from "react";
 type LandingPageProps = {
   onSelectResident: () => void;
   onSelectInvestor: () => void;
-  onSelectGovernment: () => void;
 };
 
 export default function LandingPage({
   onSelectResident,
   onSelectInvestor,
-  onSelectGovernment,
 }: LandingPageProps) {
   const [lang, setLang] = useState<"en" | "ar">("en");
   const ar = lang === "ar";

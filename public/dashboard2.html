@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NAC ML & Forecasting Dashboard</title>
 <style>
 :root{--bg:#f6f6f3;--card:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--mut:#8a8984;--grid:#e6e5e1;--line:#d9d8d3;
@@ -26,9 +26,65 @@ svg{width:100%;height:auto;display:block;overflow:visible}.tip{position:fixed;po
 table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--grid)}th{color:var(--ink2);font-weight:600;font-size:12px}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .tw{overflow-x:auto}.ok{color:var(--good)}.no{color:var(--bad)}.pill{border-radius:6px;padding:1px 7px;font-size:12px;border:1px solid var(--line)}.win{background:color-mix(in srgb,var(--g) 22%,transparent)}
 .note{color:var(--ink2);font-size:12px}ul{margin:6px 0 0 18px;padding:0}li{margin:4px 0}
+
+/* ===== ACUD reference theme (presentation only: no data, logic or behaviour is changed here) =====
+   Chart series colours (--b/--o/--g/--r/--y) are left untouched because they encode data. */
+:root{--accent:#d8232a;--accent2:#e9a800;--panel:#f0efeb;--side:#fbfbf9;--side-w:268px;--ai-right:18px;--th-bg:#ecebe6;--th-ink:#17171a}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#111111;--card:#1b1b1b;--ink:#f4f3f0;--ink2:#cfcec8;--mut:#8f8e87;--grid:#2a2a2a;--line:#303030;--panel:#171717;--side:#0e0e0e;--accent:#d8232a;--accent2:#f0b400;--th-bg:#f1f0ec;--th-ink:#17171a}}
+:root[data-theme=dark]{--bg:#111111;--card:#1b1b1b;--ink:#f4f3f0;--ink2:#cfcec8;--mut:#8f8e87;--grid:#2a2a2a;--line:#303030;--panel:#171717;--side:#0e0e0e;--accent:#d8232a;--accent2:#f0b400;--th-bg:#f1f0ec;--th-ink:#17171a}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#acud-live-status{text-align:center;letter-spacing:.01em}
+header{max-width:1320px;padding:20px 24px 10px;align-items:center}
+h1{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.badge{background:var(--card);border-color:var(--line)}
+#theme{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+main{max-width:1320px;padding:0 24px}
+.card{border-radius:6px}
+.tab>.card{border-top:2px solid var(--accent)}
+.kpi{border-inline-end:3px solid var(--accent)}.kpi:nth-child(3n){border-inline-end-color:var(--accent2)}
+.kpi .v{font-size:30px;font-weight:800}
+th{background:var(--th-bg);color:var(--th-ink)}
+select{border-radius:6px}
+.seg button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+#acud-ai{border-radius:8px!important}
+#acud-ai textarea,#acud-ai input{background:var(--card);color:var(--ink)}
+#acud-ai button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer}
+.brand{background:#fff;color:#111;padding:14px 18px;display:flex;flex-direction:column;gap:3px;border-bottom:3px solid var(--accent);z-index:31}
+.brand b{font:800 34px/1 Georgia,'Times New Roman',serif;color:var(--accent);letter-spacing:.04em}
+.brand span{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-top:2px solid var(--accent);padding-top:4px}
+nav button{font-weight:700}
+nav button[aria-selected=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media(min-width:861px){
+ body{padding-inline-end:var(--side-w);--ai-right:calc(var(--side-w) + 18px)}
+ .brand{position:fixed;top:0;inset-inline-end:0;width:var(--side-w);height:112px;justify-content:center}
+ nav{position:fixed;inset-block:0;inset-inline-end:0;width:var(--side-w);margin:0;padding:112px 0 0;flex-direction:column;gap:0;background:var(--side);border-inline-start:3px solid var(--accent);z-index:30;overflow-y:auto;counter-reset:n}
+ nav button{display:block;width:100%;text-align:start;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--ink);padding:16px 20px;font-size:15px}
+ nav button::before{counter-increment:n;content:counter(n) ". ";color:var(--mut)}
+ nav button[aria-selected=true]{background:var(--card);color:var(--ink);border-color:var(--line);box-shadow:inset 4px 0 0 var(--accent)}
+}
+@media(max-width:860px){.brand{margin:8px 16px 0;border-radius:6px;flex-direction:row;align-items:center;gap:12px}.brand span{border-top:0;padding-top:0}header,main{padding-inline:16px}nav{padding-inline:16px}}
+/* ===== end ACUD reference theme ===== */
+
+/* ===== integrated survey + sales intelligence ===== */
+.int-card{border-top:2px solid var(--accent);}
+.int-toolbar{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:12px}
+.int-field{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1}
+.int-field label{font-size:11px;color:var(--ink2);font-weight:700}
+.int-field select{width:100%}
+.int-status{font-size:12px;color:var(--ink2);min-height:18px}
+.int-error{color:var(--bad);font-size:12px;margin:8px 0}
+.int-bars{display:flex;flex-direction:column;gap:9px}
+.int-bar{display:grid;grid-template-columns:minmax(100px,1.1fr) 2fr 42px;gap:8px;align-items:center;font-size:12px}
+.int-track{height:9px;border-radius:99px;background:var(--grid);overflow:hidden}
+.int-fill{height:100%;border-radius:99px;background:var(--accent)}
+.int-table{overflow:auto}.int-table table{min-width:680px}
+.int-table th{background:var(--th-bg);color:var(--th-ink)}
+.int-note{color:var(--ink2);font-size:12px;margin:8px 0 0}
+.int-action{border-inline-start:3px solid var(--accent2);padding:8px 10px;background:color-mix(in srgb,var(--accent2) 10%,transparent);border-radius:4px;margin-top:8px;font-size:12px}
+@media(max-width:680px){.int-field{min-width:130px}.int-bar{grid-template-columns:92px 1fr 35px}.int-toolbar button{width:100%}}
 </style></head><body>
 <div id="acud-live-status" style="position:sticky;top:0;z-index:20;padding:7px 14px;background:var(--panel, #f3f6fa);border-bottom:1px solid var(--line, #d8dee8);font:12px system-ui;color:var(--ink2,#455);">Connecting to ACUD database…</div>
-<aside id="acud-ai" style="position:fixed;right:18px;bottom:18px;z-index:50;width:min(380px,calc(100vw - 36px));background:var(--panel,#fff);border:1px solid var(--line,#d8dee8);border-radius:14px;box-shadow:0 8px 30px #0002;padding:14px;font:14px system-ui;color:var(--ink,#172033);">
+<aside id="acud-ai" style="position:fixed;right:var(--ai-right,18px);bottom:18px;z-index:50;width:min(380px,calc(100vw - 36px));background:var(--panel,#fff);border:1px solid var(--line,#d8dee8);border-radius:14px;box-shadow:0 8px 30px #0002;padding:14px;font:14px system-ui;color:var(--ink,#172033);">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong>ACUD Sales Analyst · Cohere</strong><button id="acud-ai-toggle" type="button" aria-expanded="true">Hide</button></div>
   <div id="acud-ai-content" style="margin-top:10px"><p style="font-size:12px;opacity:.8;margin:4px 0 8px">Ask about sales, unsold inventory, projects, or districts. Answers use database evidence.</p>
     <textarea id="acud-ai-question" rows="3" maxlength="4000" placeholder="Why is unsold inventory high in D09?" style="box-sizing:border-box;width:100%;resize:vertical;padding:9px;border:1px solid var(--line,#ccd);border-radius:8px;font:inherit"></textarea>
@@ -39,10 +95,12 @@ table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;p
 <header><div><h1>New Administrative Capital — ML &amp; Forecasting results</h1>
 <div class="sub">Person 2 deliverables · 24 months (Jan 2024 – Dec 2025) · <b>synthetic data</b> with simulated Egyptian-calendar seasonality</div></div>
 <div><span class="badge" id="vbadge"></span> <button class="badge" id="theme" style="cursor:pointer">Theme</button></div></header>
+<!-- Brand panel: text wordmark placeholder. Replace the contents with the official ACUD logo image when available. -->
+<div class="brand"><b>ACUD</b><span>Administrative Capital for Urban Development</span></div>
 <nav role="tablist" id="nav"></nav>
 <main>
 <section class="tab" id="t-over"></section><section class="tab" id="t-fc"></section><section class="tab" id="t-an"></section>
-<section class="tab" id="t-risk"></section><section class="tab" id="t-lim"></section>
+<section class="tab" id="t-risk"></section><section class="tab" id="t-sv"></section><section class="tab" id="t-lim"></section>
 </main><div class="tip" id="tip"></div>
 <script type="module">
 // Load current aggregates from the API/database before rendering. Embedded data is a demo fallback only.
@@ -109,7 +167,7 @@ const seg = (host, opts, cur, cb) => { host.innerHTML=opts.map(o=>`<button aria-
 const ramShades = (labels) => { const sh=[]; labels.forEach((l,i)=>{ if((D.ramadan_days[l]||0)>=10){ const p=sh[sh.length-1]; if(p&&p.i1===i-1) p.i1=i; else sh.push({i0:i,i1:i,label:'Ramadan'}); } }); return sh; };
 
 /* ---------- nav ---------- */
-const TABS=[['over','Overview & seasonality'],['fc','Forecasts'],['an','Anomaly detection'],['risk','Unsold risk (90 days)'],['lim','Data, method & limits']];
+const TABS=[['over','Overview & seasonality'],['fc','Forecasts'],['an','Anomaly detection'],['risk','Unsold risk (90 days)'],['sv','Customer intelligence'],['lim','Data, method & limits']];
 $('#nav').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${t[0]}" aria-selected="${i==0}">${t[1]}</button>`).join('');
 $$('#nav button').forEach(b=>b.onclick=()=>{$$('#nav button').forEach(x=>x.setAttribute('aria-selected',x===b));$$('.tab').forEach(s=>s.classList.toggle('on',s.id==='t-'+b.dataset.t));location.hash=b.dataset.t;});
 $('#vbadge').textContent=`Data validation ${D.validation.pass}/${D.validation.total} rules pass`;
@@ -194,6 +252,37 @@ $('#theme').onclick=()=>{const r=document.documentElement; const dark=(r.dataset
   const cal=D.risk_cal; lineChart($('#r-cal'),{labels:cal.map((c,i)=>i),xfmt:i=>'D'+(i+1),series:[{name:'Observed unsold rate',color:C.b,vals:cal.map(c=>c.observed),dots:true},{name:'Predicted (perfect calibration)',color:C.mut,vals:cal.map(c=>c.mean_pred),dash:'4 4'}],yMin:.5,yMax:1,w:560,h:320,yfmt:v=>v.toFixed(2),vfmt:v=>v.toFixed(3),extra:i=>`<br><span class="note">decile ${i+1}: predicted ${cal[i].mean_pred.toFixed(3)}</span>`,title:'Calibration'});
   barChart($('#r-pr'),D.risk_proj.slice(0,12).map(p=>({l:p.Project_ID+' · '+p.District_ID,v:p.expected_unsold_90d,tip:`${p.Project_ID}: ${p.units_on_market} units on market, expected unsold ${p.expected_unsold_90d.toFixed(0)}, expected sold ${p.expected_sold_90d.toFixed(0)}`})),{ml:100,w:560,rowH:30,fmt:v=>v.toFixed(0)});
   $('#r-d').innerHTML=`<tr><th>District</th><th class="n">Units</th><th class="n">Mean P(unsold)</th><th class="n">Expected sold in 90d</th><th class="n">High-risk units</th></tr>`+D.risk_dist.map(d=>`<tr><td>${d.District_ID}</td><td class="n">${d.units.toLocaleString()}</td><td class="n">${d.mean_p.toFixed(3)}</td><td class="n">${(d.units-d.expected_unsold).toFixed(0)}</td><td class="n">${d.high.toLocaleString()}</td></tr>`).join('');
+})();
+
+/* ---------- Customer intelligence: survey + sales integration ---------- */
+(function(){
+  const h=$('#t-sv');
+  h.innerHTML=`<div class="card int-card">
+    <div class="int-toolbar">
+      <div class="int-field"><label for="sv-d">District</label><select id="sv-d"><option value="">All districts</option></select></div>
+      <div class="int-field"><label for="sv-p">Project</label><select id="sv-p"><option value="">All projects</option></select></div>
+      <button id="sv-reset" class="badge" type="button">Reset filters</button>
+    </div>
+    <div id="sv-status" class="int-status">Loading survey and sales evidence…</div><div id="sv-error" class="int-error"></div>
+  </div>
+  <div id="sv-kpis" class="grid g4" style="margin-top:12px"></div>
+  <div class="grid g2" style="margin-top:12px"><div class="card int-card"><h2>Most impactful problems</h2><p class="int-note">Count of eligible respondents selecting each problem.</p><div id="sv-problems" class="int-bars"></div></div>
+    <div class="card int-card"><h2>Top improvement priorities</h2><p class="int-note">What respondents most want ACUD to improve.</p><div id="sv-priorities" class="int-bars"></div></div></div>
+  <div class="grid g2" style="margin-top:12px"><div class="card int-card"><h2>Service importance vs current level</h2><p class="int-note">Positive gap means importance is higher than the reported current level.</p><div id="sv-gaps" class="int-bars"></div></div>
+    <div class="card int-card"><h2>Decision impact</h2><p class="int-note">Self-reported impact of service problems; not observed conversion loss.</p><div id="sv-impact" class="int-bars"></div><div id="sv-action"></div></div></div>
+  <div class="card int-card" style="margin-top:12px"><h2>Complaints ↔ sales by district</h2><p class="int-note">Joined on the existing District_ID. Associations are illustrative and do not prove causation.</p><div class="int-table"><table><thead><tr><th>District</th><th>Responses</th><th>Top complaint</th><th>Count</th><th>Attractiveness</th><th>Units sold</th><th>Inventory</th></tr></thead><tbody id="sv-dist"></tbody></table></div></div>
+  <div class="card int-card" style="margin-top:12px"><h2>Complaints ↔ sales by project</h2><p class="int-note">Use this table to move from a portfolio issue to a specific project.</p><div class="int-table"><table><thead><tr><th>Project</th><th>District</th><th>Responses</th><th>Top complaint</th><th>Count</th><th>Units sold</th><th>Inventory</th></tr></thead><tbody id="sv-proj"></tbody></table></div></div>
+  <div class="card" style="margin-top:12px"><h2>Evidence and limits</h2><p class="int-note">This integrated view combines the strongest logic from the survey dashboard with the executive navigation of Dashboard 2. All survey rows are synthetic linked demonstration data; relationships are not causal evidence. Use the Forecasts and Unsold risk tabs for model-based forward-looking analysis.</p></div>`;
+  let projects=[], seq=0;
+  const fmtN=x=>x==null||!Number.isFinite(Number(x))?'—':Number(x).toLocaleString(undefined,{maximumFractionDigits:2});
+  const escS=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const bar=(id,items,color)=>{const el=$(id);if(!items?.length){el.innerHTML='<div class="int-note">No evidence for the current filters.</div>';return;}const mx=Math.max(1,...items.map(x=>Number(x.count)||0));el.innerHTML=items.slice(0,8).map(x=>`<div class="int-bar"><span title="${escS(x.label)}">${escS(x.label)}</span><span class="int-track"><span class="int-fill" style="width:${Math.max(1,(Number(x.count)||0)/mx*100)}%;background:${color}"></span></span><b>${fmtN(x.count)}</b></div>`).join('');};
+  const rows=(id,items,kind)=>{const el=$(id);if(!items?.length){el.innerHTML=`<tr><td colspan="${kind==='dist'?7:7}">No linked rows for the current filters.</td></tr>`;return;}el.innerHTML=items.slice(0,40).map(x=>kind==='dist'?`<tr><td>${escS(x.district_id)} · ${escS(x.district_name)}</td><td>${fmtN(x.survey_responses)}</td><td>${escS(x.top_complaint||'—')}</td><td>${fmtN(x.top_complaint_count)}</td><td>${fmtN(x.average_attractiveness)}</td><td>${fmtN(x.sales?.units_sold)}</td><td>${fmtN(x.sales?.available_inventory)}</td></tr>`:`<tr><td>${escS(x.project_id)} · ${escS(x.project_name)}</td><td>${escS(x.district_id||'—')}</td><td>${fmtN(x.survey_responses)}</td><td>${escS(x.top_complaint||'—')}</td><td>${fmtN(x.top_complaint_count)}</td><td>${fmtN(x.sales?.units_sold)}</td><td>${fmtN(x.sales?.available_inventory)}</td></tr>`).join('');};
+  const fillProjects=()=>{const d=$('#sv-d').value,cur=$('#sv-p').value;const list=projects.filter(x=>!d||String(x.District_ID)===d);$('#sv-p').innerHTML='<option value="">All projects'+(d?' in '+escS(d):'')+'</option>'+list.map(x=>`<option value="${escS(x.Project_ID)}">${escS(x.Project_ID)} · ${escS(x.Project_Name)} (${escS(x.District_ID)})</option>`).join('');if(list.some(x=>x.Project_ID===cur))$('#sv-p').value=cur;};
+  const render=d=>{const s=d.survey||{};$('#sv-kpis').innerHTML=[['responses','Eligible responses',s.responses],['attractiveness','Avg attractiveness',(s.attractiveness==null?'—':fmtN(s.attractiveness)+' / 5')],['sold','Units sold',((d.sales?.projects||[]).reduce((a,x)=>a+(Number(x.units_sold)||0),0)||'—')],['inventory','Available inventory',((d.sales?.projects||[]).reduce((a,x)=>a+(Number(x.available_inventory)||0),0)||'—')]].map(x=>`<div class="card kpi"><div class="v">${typeof x[2]==='number'?fmtN(x[2]):x[2]}</div><div class="l">${x[1]}</div><div class="n">${x[0]==='responses'?'Synthetic eligible sample':d.sales?.as_of?'As of '+d.sales.as_of:''}</div></div>`).join('');bar('#sv-problems',s.top_problems,'var(--r)');bar('#sv-priorities',s.priority_issues,'var(--g)');bar('#sv-impact',s.decision_impact,'var(--o)');const gaps=(s.service_gaps||[]).map(x=>({label:x.service,count:Math.max(0,Number(x.gap)||0)}));bar('#sv-gaps',gaps,'var(--accent2)');rows('#sv-dist',d.linked_comparison?.districts||[],'dist');rows('#sv-proj',d.linked_comparison?.projects||[],'proj');const top=(s.service_gaps||[])[0];$('#sv-action').innerHTML=top?`<div class="int-action"><b>Priority signal:</b> investigate <b>${escS(top.service)}</b> first; gap ${fmtN(top.gap)} on a 1–5 scale. Validate with operational data before taking action.</div>`:'';$('#sv-status').textContent=`Loaded ${fmtN(s.responses)} eligible survey responses · ${d.sales?.as_of?'sales as of '+d.sales.as_of:'sales period unavailable'} · synthetic demonstration data`;};
+  const load=async()=>{const my=++seq;$('#sv-error').textContent='';$('#sv-status').textContent='Loading survey and sales evidence…';try{const q=new URLSearchParams();if($('#sv-d').value)q.set('district_id',$('#sv-d').value);if($('#sv-p').value)q.set('project_id',$('#sv-p').value);const r=await fetch(`${window.ACUD_API_BASE}/api/v1/survey-sales/dashboard?${q}`);const d=await r.json().catch(()=>({}));if(my!==seq)return;if(!r.ok)throw Error(d.detail||`API returned ${r.status}`);render(d);}catch(e){if(my!==seq)return;$('#sv-error').textContent=`Could not load survey intelligence: ${e.message}. Start the backend and seed the survey table.`;$('#sv-status').textContent='Survey intelligence unavailable';}};
+  (async()=>{try{const r=await fetch(`${window.ACUD_API_BASE}/api/v1/survey-sales/options`);const d=await r.json();if(r.ok){projects=d.projects||[];$('#sv-d').innerHTML='<option value="">All districts</option>'+(d.districts||[]).map(x=>`<option value="${escS(x.District_ID)}">${escS(x.District_ID)} · ${escS(x.District_Name)}</option>`).join('');fillProjects();}}catch(e){/* dashboard status will explain API failure */}load();})();
+  $('#sv-d').onchange=()=>{fillProjects();load();};$('#sv-p').onchange=load;$('#sv-reset').onclick=()=>{$('#sv-d').value='';fillProjects();$('#sv-p').value='';load();};
 })();
 
 /* ---------- Limits ---------- */
