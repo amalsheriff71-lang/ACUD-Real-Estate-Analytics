@@ -204,3 +204,12 @@ def test_area_filter_narrows_findings_but_keeps_full_statistics():
     b = next(f for f in one["service_findings"] if f["finding_id"] == "F-D03-transport")
     assert a["bottom_box"] == b["bottom_box"] and a["q_bh"] == b["q_bh"]
     assert all("D03" in r["affected_areas"] for r in one["recommended_actions"])
+
+
+# ---- regression: constant input must never yield a "significant" permutation p-value
+def test_constant_variable_gives_undefined_correlation_not_false_significance():
+    rows = [{"district_id": f"D{i}", "bottom_box": 0.2} for i in range(1, 11)]          # no variation at all
+    ctx = pd.DataFrame({"District_ID": [f"D{i}" for i in range(1, 11)], "sell_through_pct": list(range(10, 110, 10))})
+    out = sg.commercial_association(rows, ctx)
+    assert out["primary"]["rho"] is None and out["primary"]["p_permutation"] is None
+    assert "not computable" in out["primary"]["direction"]

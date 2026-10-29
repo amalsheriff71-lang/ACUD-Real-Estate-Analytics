@@ -12,6 +12,7 @@ from sqlalchemy import inspect, text
 
 from app.config import get_settings
 from app.database import engine
+from app.analytics.executive import executive_brief
 from app.analytics.service_gap import analyze as analyze_service_gap
 from app.routers.sales import _read
 
@@ -138,6 +139,7 @@ def dashboard(
             "survey_responses": int(len(group)),
             "top_complaint": str(top.index[0]) if len(top) else None,
             "top_complaint_count": int(top.iloc[0]) if len(top) else 0,
+            "top_complaint_share": round(float(top.iloc[0]) / len(group), 4) if len(top) else None,
             "average_attractiveness": round(float(pd.to_numeric(group.get("q13_area_attractiveness_1_5"), errors="coerce").mean()), 2) if "q13_area_attractiveness_1_5" in group else None,
             "sales": _records(sales_row.head(1))[0] if not sales_row.empty else None,
         })
@@ -156,6 +158,7 @@ def dashboard(
             "survey_responses": int(len(group)),
             "top_complaint": str(top.index[0]) if len(top) else None,
             "top_complaint_count": int(top.iloc[0]) if len(top) else 0,
+            "top_complaint_share": round(float(top.iloc[0]) / len(group), 4) if len(top) else None,
             "sales": _records(sales_row.head(1))[0] if not sales_row.empty else None,
         })
     linked_projects.sort(key=lambda x: x["project_id"])
@@ -207,6 +210,24 @@ def service_gap(district_id: str | None = Query(default=None, min_length=2, max_
         survey, districts, projects,
         indicators=_optional("Fact_District_Service_Indicators"), status=_optional("Fact_District_Monthly_Status"),
         funnel=_optional("Fact_Project_Sales_Funnel"), area_id=district_id,
+    )
+
+
+@router.get("/executive")
+def executive(
+    district_id: str | None = Query(default=None, min_length=2, max_length=32),
+    sales_position: Literal["weaker", "stronger"] | None = Query(default=None),
+):
+    """Executive brief: readiness, satisfaction, pain points, weaker-vs-stronger comparison, hypothesis test, priority classes, actions.
+
+    `district_id` and `sales_position` filter the respondent-level views (denominators change accordingly).
+    The group comparison, association test and priority classes always use all districts (they need the full comparison set).
+    """
+    survey = _survey()
+    return executive_brief(
+        survey, _read("Dim_District"), _read("Dim_Project"),
+        indicators=_optional("Fact_District_Service_Indicators"), status=_optional("Fact_District_Monthly_Status"),
+        funnel=_optional("Fact_Project_Sales_Funnel"), district_id=district_id, sales_position=sales_position,
     )
 
 

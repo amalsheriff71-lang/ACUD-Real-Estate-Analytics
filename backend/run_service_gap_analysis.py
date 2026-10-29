@@ -10,6 +10,7 @@ import pandas as pd
 BACKEND = Path(__file__).resolve().parent
 ROOT = BACKEND.parent
 sys.path.insert(0, str(BACKEND))
+from app.analytics.executive import executive_brief  # noqa: E402
 from app.analytics.service_gap import analyze  # noqa: E402
 
 
@@ -24,10 +25,14 @@ def main() -> None:
     ap.add_argument("--area", default=None)
     ap.add_argument("--data-dir", default=str(ROOT / "data"))
     ap.add_argument("--out", default=str(ROOT / "outputs" / "service_gap_analysis.json"))
+    ap.add_argument("--executive-out", default=str(ROOT / "outputs" / "executive_brief.json"))
     a = ap.parse_args()
     result = analyze(**load(Path(a.data_dir)), area_id=a.area)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(result, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    if a.area is None:
+        Path(a.executive_out).write_text(json.dumps(executive_brief(**load(Path(a.data_dir))), ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        print(f"wrote {a.executive_out}")
     print(f"wrote {a.out}: status={result['analysis_status']} findings={len(result['service_findings'])} recommendations={len(result['recommended_actions'])}")
 
 

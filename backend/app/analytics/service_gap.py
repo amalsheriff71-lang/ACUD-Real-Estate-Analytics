@@ -422,6 +422,8 @@ def commercial_association(area_rows: list[dict[str, Any]], ctx: pd.DataFrame, *
     def rho_perm(x: pd.Series, y: pd.Series) -> dict[str, Any]:
         """Spearman rho with a two-sided permutation p-value (vectorised; rank-transform then Pearson)."""
         rx, ry = stats.rankdata(x.to_numpy()), stats.rankdata(y.to_numpy())
+        if np.ptp(rx) == 0 or np.ptp(ry) == 0:  # a constant variable has no defined correlation: never report a p-value
+            return {"rho": None, "p_permutation": None, "undefined_reason": "no variation in one variable"}
         rho = float(np.corrcoef(rx, ry)[0, 1])
         rng = np.random.default_rng(seed)
         perms = rng.permuted(np.tile(rx, (9999, 1)), axis=1)
@@ -440,13 +442,13 @@ def commercial_association(area_rows: list[dict[str, Any]], ctx: pd.DataFrame, *
     if "Lifecycle_Archetype" in d:
         maturity = {k: _r(float(v), 1) for k, v in d.groupby("Lifecycle_Archetype")["sell_through_pct"].mean().items()}
     rho = primary["rho"]
-    q = benjamini_hochberg([primary["p_permutation"]] + [x["p_permutation"] for x in alts])
+    q = benjamini_hochberg([primary["p_permutation"]] + [x["p_permutation"] for x in alts])  # None p-values stay None
     primary["q_bh_over_5_correlations"] = _r(q[0], 4)
     for x, qq in zip(alts, q[1:]):
         x["q_bh_over_5_correlations"] = _r(qq, 4)
     return {**out, "status": "preliminary_association_only", "n_districts": int(n),
             "primary": {"x": "mean bottom-box across services (unweighted district dissatisfaction index)", "y": "sell_through_pct", **primary,
-                        "direction": ("no meaningful association (|rho| < 0.3 or p >= 0.05)" if (rho is None or abs(rho) < 0.3 or primary["p_permutation"] >= 0.05) else ("higher dissatisfaction with lower sell-through" if rho < 0 else "higher dissatisfaction with higher sell-through")),
+                        "direction": ("not computable (no variation in one variable)" if rho is None else "no meaningful association (|rho| < 0.3 or p >= 0.05)" if (abs(rho) < 0.3 or primary["p_permutation"] >= 0.05) else ("higher dissatisfaction with lower sell-through" if rho < 0 else "higher dissatisfaction with higher sell-through")),
                         "ci95": None, "ci_note": "No confidence interval: n districts is too small for a reliable interval; permutation p only."},
             "alternative_explanations_same_outcome": alts, "sell_through_by_lifecycle_archetype": maturity,
             "interpretation": "Association between area-level aggregates (n = districts). Not causal. Development maturity (lifecycle stage) is a likely confounder of sell-through and cannot be adjusted for with this few districts.",
