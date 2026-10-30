@@ -4,7 +4,7 @@
 <style>
 /* THEME TOKENS: ACUD brand system. Brand red #ED1C24, black and white are the identity; red is a strategic accent only
    (selected navigation, decision, weaker-sales series, top of the heat ramp, focus). Surfaces are tonal charcoal, never pure black.
-   Chart pair red/blue validated on the dark surface (dataviz validator: all checks pass). The official logo file is still pending (assets/acud-logo.svg slot). */
+   Chart pair red/blue validated on the dark surface (dataviz validator: all checks pass). Official logo: assets/acud-logo.png (supplied by the owner; opaque white background, shown as supplied). */
 :root{color-scheme:dark;
 /* brand */--red:#ED1C24;--red-strong:#D41A21;--red-deep:#8F1F25;--red-text:#FF5A60;--red-tint:rgba(237,28,36,.14);--black:#000000;--white:#FFFFFF;
 /* header */--brand-1:#0A0A0B;--brand-2:#1A1B1E;--brand-ink:#F5F5F3;
@@ -19,7 +19,7 @@
 /* tooltip */--tip-shadow:rgba(0,0,0,.55)}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 header{background:linear-gradient(115deg,var(--brand-1),var(--brand-2));color:var(--brand-ink);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-header img{height:38px;width:auto}header h1{font-size:18px;margin:0;font-weight:650}header p{margin:0;font-size:12px;opacity:.85}
+header img{height:60px;width:auto;border-radius:6px}header h1{font-size:18px;margin:0;font-weight:650}header p{margin:0;font-size:12px;opacity:.85}
 .shell{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 66px)}
 nav{background:var(--sidebar);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
 nav button{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;color:var(--ink2);font-weight:550}nav button:hover{background:var(--nav-hover)}
@@ -46,7 +46,7 @@ svg text{fill:var(--ink2);font:11.5px system-ui,sans-serif}svg .ax{stroke:var(--
 .view{display:none}.view.on{display:block}.small{font-size:12px;color:var(--muted)}.err{color:var(--err)}
 @media(max-width:900px){.shell{grid-template-columns:1fr}nav{flex-direction:row;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}.kpis{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}main{padding:12px}}
 </style></head><body>
-<header><img id="logo" src="assets/acud-logo.svg" alt="ACUD logo" onerror="this.remove()"><div><h1>Resident Service Intelligence</h1><p>Administrative Capital for Urban Development · Resident survey and service gap analysis</p></div></header>
+<header><img id="logo" src="assets/acud-logo.png" alt="ACUD logo" onerror="this.remove()"><div><h1>Resident Service Intelligence</h1><p>Administrative Capital for Urban Development · Resident survey and service gap analysis</p></div></header>
 <div class="shell">
 <nav aria-label="Views" id="nav"></nav>
 <main>

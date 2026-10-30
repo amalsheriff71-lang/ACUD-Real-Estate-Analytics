@@ -38,7 +38,7 @@ Full machine-readable contract (formula, numerator, denominator, filter behaviou
 | Ties made the exact Mann-Whitney p unreliable | Medium | scipy exact method assumes no ties | Own exact label-permutation with average ranks | `test_exact_mwu_hand_calculated` |
 
 ## Not tested / blocked
-* **Official ACUD logo and brand colours**: could not be retrieved here (site not on the network allowlist). The page uses a clearly marked provisional theme (`--brand-*` tokens) and a logo slot: drop the official file at `assets/acud-logo.svg` and set `--brand-1/--brand-2` from its dominant colours. Chart colours come from a validated palette and are independent of branding.
+* **Logo and brand colours**: official logo supplied by the owner and placed at `assets/acud-logo.png` (400x207, opaque white background, shown unmodified; a higher-resolution or transparent version would look sharper on the dark header). Brand red `#ED1C24`, black and white were supplied by the owner; chart colours are validated separately.
 * Cohere `/ask` integration: no API key, not executed.
 * PostgreSQL: API tested only on SQLite.
 * Missing data: sales targets, availability data for 5 of 10 services, travel times/coordinates, prospective-buyer flag, "don't know" option, response rates. The existing questionnaire was left unchanged.
