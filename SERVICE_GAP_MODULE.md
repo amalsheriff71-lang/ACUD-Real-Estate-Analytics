@@ -33,7 +33,7 @@ Full machine-readable contract (formula, numerator, denominator, filter behaviou
 | Bug | Severity | Root cause | Fix | Proof |
 |---|---|---|---|---|
 | Correlation with a constant variable returned `p = 0.0001` (false significance) | High | NaN correlation never matched the permutation comparison | Return undefined rho/p and a "not computable" label | `test_constant_variable_gives_undefined_correlation_not_false_significance` |
-| Legacy tables compared raw top-complaint counts across areas of different sample size | Medium | Count shown without denominator | Added `top_complaint_share` (count / respondents) to API and tables | `test_legacy_filters_and_complaint_share_regression` |
+| Legacy tables compared raw top-complaint counts across areas of different sample size | Medium | Count shown without denominator | Same defect was fixed independently on `main` (`top_complaint_share_pct`); this branch adopts that field in the legacy table | `test_legacy_filters_and_complaint_share_regression` |
 | KPI "Selected project units sold" was the latest-month portfolio total | Low | Misleading label | Relabelled "Units sold, latest month (selection)" | dashboard render check |
 | Ties made the exact Mann-Whitney p unreliable | Medium | scipy exact method assumes no ties | Own exact label-permutation with average ranks | `test_exact_mwu_hand_calculated` |
 

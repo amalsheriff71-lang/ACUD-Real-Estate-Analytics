@@ -48,7 +48,7 @@ def test_legacy_filters_and_complaint_share_regression(client, eligible):
     assert d3["survey"]["responses"] == len(sub)
     row = d3["linked_comparison"]["districts"][0]
     top = sub["q5_most_impactful_problem"].value_counts()
-    assert row["top_complaint_count"] == int(top.iloc[0]) and row["top_complaint_share"] == round(top.iloc[0] / len(sub), 4)   # share added: counts alone are not comparable across areas
+    assert row["top_complaint_count"] == int(top.iloc[0]) and row["top_complaint_share_pct"] == round(top.iloc[0] / top.sum() * 100, 1)   # share beside the count: counts alone are not comparable across areas
     both = client.get(f"{BASE}/dashboard", params={"district_id": "D03", "project_id": "P001"}).json()   # P001 belongs to D01
     assert both["survey"]["responses"] == 0 and both["survey"]["service_gaps"] == []
     assert client.get(f"{BASE}/dashboard").json()["survey"]["responses"] == 945                                   # clearing filters restores baseline

@@ -43,6 +43,24 @@ def _records(df: pd.DataFrame) -> list[dict]:
     return df.astype(object).where(pd.notna(df), None).to_dict("records")
 
 
+def _decision_signal(frame: pd.DataFrame) -> dict:
+    """Summarize reported decision influence without treating it as observed conversion."""
+    col = "q11_problem_changed_decision"
+    if col not in frame:
+        return {"valid_responses": 0, "affected_count": 0, "affected_pct": None, "outcome_changed_count": 0, "outcome_changed_pct": None}
+    values = frame[col].dropna().astype(str).str.strip()
+    valid = values[~values.str.contains("لا ينطبق", na=False)]
+    affected = valid.str.startswith("نعم")
+    outcome_changed = valid.str.contains("أجل القرار|منطقة أخرى", regex=True, na=False)
+    return {
+        "valid_responses": int(len(valid)),
+        "affected_count": int(affected.sum()),
+        "affected_pct": round(float(affected.mean() * 100), 1) if len(valid) else None,
+        "outcome_changed_count": int(outcome_changed.sum()),
+        "outcome_changed_pct": round(float(outcome_changed.mean() * 100), 1) if len(valid) else None,
+    }
+
+
 def _latest_sales(district_id: str | None = None, project_id: str | None = None):
     inv = _read("Fact_Inventory_Monthly").copy()
     inv["Month"] = pd.to_datetime(inv["Month"], errors="coerce")
@@ -112,7 +130,8 @@ def dashboard(
         values = survey[column].dropna().astype(str)
         if split:
             values = values[values.str.strip().ne("")].str.split(r"\s*[;；]\s*").explode()
-        return [{"label": str(k), "count": int(v)} for k, v in values.value_counts().head(12).items()]
+        denominator = len(values)
+        return [{"label": str(k), "count": int(v), "share_pct": round(float(v / denominator * 100), 1) if denominator else None} for k, v in values.value_counts().head(12).items()]
 
     service_gaps = []
     for key, label in SERVICE_NAMES.items():
@@ -122,8 +141,9 @@ def dashboard(
             current = pd.to_numeric(survey[level], errors="coerce")
             valid = importance.notna() & current.notna()
             if valid.any():
-                service_gaps.append({"service": label, "importance": round(float(importance[valid].mean()), 2), "current_level": round(float(current[valid].mean()), 2), "gap": round(float((importance[valid] - current[valid]).mean()), 2)})
+                service_gaps.append({"service": label, "importance": round(float(importance[valid].mean()), 2), "current_level": round(float(current[valid].mean()), 2), "gap": round(float((importance[valid] - current[valid]).mean()), 2), "valid_responses": int(valid.sum()), "coverage_pct": round(float(valid.mean() * 100), 1)})
     service_gaps.sort(key=lambda x: x["gap"], reverse=True)
+    decision_signal = _decision_signal(survey)
 
     as_of, sales_projects, sales_districts = _latest_sales(district_id, project_id)
     # District-level complaint/sales comparison uses the same District_ID on both tables.
@@ -132,6 +152,7 @@ def dashboard(
         if pd.isna(did):
             continue
         top = group.get("q5_most_impactful_problem", pd.Series(dtype=str)).dropna().astype(str).value_counts()
+        group_decision = _decision_signal(group)
         sales_row = sales_districts[sales_districts["District_ID"].astype(str).str.upper() == str(did).upper()]
         linked_districts.append({
             "district_id": str(did),
@@ -139,8 +160,9 @@ def dashboard(
             "survey_responses": int(len(group)),
             "top_complaint": str(top.index[0]) if len(top) else None,
             "top_complaint_count": int(top.iloc[0]) if len(top) else 0,
-            "top_complaint_share": round(float(top.iloc[0]) / len(group), 4) if len(top) else None,
+            "top_complaint_share_pct": round(float(top.iloc[0] / top.sum() * 100), 1) if len(top) and top.sum() else None,
             "average_attractiveness": round(float(pd.to_numeric(group.get("q13_area_attractiveness_1_5"), errors="coerce").mean()), 2) if "q13_area_attractiveness_1_5" in group else None,
+            "decision_signal": group_decision,
             "sales": _records(sales_row.head(1))[0] if not sales_row.empty else None,
         })
     linked_districts.sort(key=lambda x: x["district_id"])
@@ -150,6 +172,7 @@ def dashboard(
         if pd.isna(pid):
             continue
         top = group.get("q5_most_impactful_problem", pd.Series(dtype=str)).dropna().astype(str).value_counts()
+        group_decision = _decision_signal(group)
         sales_row = sales_projects[sales_projects["Project_ID"].astype(str).str.upper() == str(pid).upper()]
         linked_projects.append({
             "project_id": str(pid),
@@ -158,7 +181,9 @@ def dashboard(
             "survey_responses": int(len(group)),
             "top_complaint": str(top.index[0]) if len(top) else None,
             "top_complaint_count": int(top.iloc[0]) if len(top) else 0,
-            "top_complaint_share": round(float(top.iloc[0]) / len(group), 4) if len(top) else None,
+            "top_complaint_share_pct": round(float(top.iloc[0] / top.sum() * 100), 1) if len(top) and top.sum() else None,
+            "average_attractiveness": round(float(pd.to_numeric(group.get("q13_area_attractiveness_1_5"), errors="coerce").mean()), 2) if "q13_area_attractiveness_1_5" in group else None,
+            "decision_signal": group_decision,
             "sales": _records(sales_row.head(1))[0] if not sales_row.empty else None,
         })
     linked_projects.sort(key=lambda x: x["project_id"])
@@ -169,15 +194,23 @@ def dashboard(
         "survey": {
             "responses": int(len(survey)),
             "eligible_responses": int(len(survey)),
+            "total_rows": int(len(df)),
+            "screened_out": int(len(df) - len(eligible)),
             "districts": counts("district_name"),
+            "relationship_to_area": counts("q1_relationship_to_area"),
+            "location_label": counts("q2_location_label"),
+            "relationship_duration": counts("q3_relationship_duration"),
             "top_problems": counts("q5_most_impactful_problem"),
             "recent_problems": counts("q4_recent_service_problems", True),
+            "problem_frequency": counts("q6_problem_frequency"),
+            "problem_severity": counts("q7_problem_severity"),
+            "decision_factors": counts("q10_top_3_decision_factors", True),
             "priority_issues": counts("q15_top_improvement_priority"),
-            "frequency": counts("q6_problem_frequency"),
-            "severity": counts("q7_problem_severity"),
             "recommendation": counts("q14_recommend_area"),
             "decision_impact": counts("q11_problem_changed_decision"),
+            "decision_signal": decision_signal,
             "attractiveness": round(float(pd.to_numeric(survey["q13_area_attractiveness_1_5"], errors="coerce").mean()), 2) if "q13_area_attractiveness_1_5" in survey and len(survey) else None,
+            "attractiveness_distribution": counts("q13_area_attractiveness_1_5"),
             "service_gaps": service_gaps,
         },
         "sales": {"as_of": as_of, "districts": _records(sales_districts.sort_values("units_sold")) if not sales_districts.empty else [], "projects": _records(sales_projects.sort_values("units_sold").head(40)) if not sales_projects.empty else []},

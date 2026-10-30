@@ -9,6 +9,8 @@
 5. **Cohere sales assistant**: `POST /api/v1/sales/ask` answers questions with database-derived evidence, optional district/project filters, and explicit synthetic-data caveats.
 6. **Additional prototype features**: `data/extend_prototype_data.py` creates clearly labeled synthetic traffic/access/service and project-level funnel indicators. No individual-level customer data is generated.
 7. **Secrets hygiene**: the uploaded `.env` file has been excluded from this deliverable; use `backend/.env.example` to configure local secrets.
+8. **Resident Survey Intelligence**: `public/survey-dashboard.html` is the survey-owner view. It follows the decision path `resident voice → service gap → reported decision impact → evidence-based next step`; sales data is shown only as secondary area-prioritization context, never as proof of causality.
+9. **Survey evidence API**: `GET /api/v1/survey-sales/dashboard` now returns decision-impact signals, response shares, valid-response coverage for each service gap, and district-level survey evidence for cautious comparison.
 
 ## Validation performed
 

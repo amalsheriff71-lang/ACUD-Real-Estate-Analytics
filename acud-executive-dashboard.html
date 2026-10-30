@@ -74,8 +74,8 @@ const T=s=>`data-tip="${esc(s)}" tabindex="0"`;
 $('nav').innerHTML=VIEWS.map(([k,l])=>`<button data-v="${k}" aria-current="${k==='brief'}">${l}</button>`).join('');
 $('nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;cur=b.dataset.v;[...$('nav').children].forEach(x=>x.setAttribute('aria-current',x.dataset.v===cur));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+cur))};
 /* data */
-async function load(){$('status').textContent='Loading…';try{const q=new URLSearchParams();if($('fArea').value)q.set('district_id',$('fArea').value);if($('fPos').value)q.set('sales_position',$('fPos').value);
-const r=await fetch(`${API}/executive?${q}`);const d=await r.json();if(!r.ok)throw Error(d.detail||'request failed');D=d;fillFilters();render();$('status').textContent=`${D.respondents_in_filter} respondents in view`}catch(e){$('status').innerHTML=`<span class="err">Could not load: ${esc(e.message)}. Start the API (see SERVICE_GAP_MODULE.md).</span>`}}
+let seq=0;async function load(){const my=++seq;$('status').textContent='Loading…';try{const q=new URLSearchParams();if($('fArea').value)q.set('district_id',$('fArea').value);if($('fPos').value)q.set('sales_position',$('fPos').value);
+const r=await fetch(`${API}/executive?${q}`);const d=await r.json();if(!r.ok)throw Error(d.detail||'request failed');if(my!==seq)return;D=d;fillFilters();render();$('status').textContent=`${D.respondents_in_filter} respondents in view`}catch(e){$('status').innerHTML=`<span class="err">Could not load: ${esc(e.message)}. Start the API (see SERVICE_GAP_MODULE.md).</span>`}}
 let filled=false;function fillFilters(){if(filled||!D.sales_position)return;filled=true;const ids=Object.keys(D.sales_position.by_district||{}).sort();
 $('fArea').innerHTML='<option value="">All areas</option>'+(D.district_points||[]).map(p=>`<option value="${esc(p.district_id)}">${esc(p.district_id)}${p.sales_position?' · '+p.sales_position:''}</option>`).join('');
 $('fSvc').innerHTML='<option value="">All services</option>'+D.satisfaction_by_service.map(s=>`<option value="${s.service}">${esc(s.label_en)}</option>`).join('')}
