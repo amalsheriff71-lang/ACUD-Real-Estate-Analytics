@@ -2,24 +2,31 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ACUD Resident Service Intelligence</title>
 <style>
-/* THEME TOKENS. PROVISIONAL: the official ACUD logo could not be retrieved, so brand colours were NOT extracted.
-   Replace --brand-* with the logo's dominant colours (see SERVICE_GAP_MODULE.md). Chart colours are a validated palette. */
-:root{color-scheme:light;--brand-1:#142a4f;--brand-2:#1d4378;--brand-ink:#ffffff;
---bg:#f4f6fa;--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#6f6d67;--line:#e1e0d9;--axis:#c3c2b7;
---s-strong:#2a78d6;--s-weak:#eb6834;--warn-bg:#fff7e8;--warn-line:#f0d5a8;--warn-ink:#714d16;
---r100:#cde2fb;--r200:#9ec5f4;--r300:#6da7ec;--r400:#3987e5;--r500:#256abf;--r600:#184f95;--r700:#0d366b}
-@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){color-scheme:dark;--bg:#0d0d0d;--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#a7a59d;--line:#2c2c2a;--axis:#383835;
---s-strong:#3987e5;--s-weak:#d95926;--warn-bg:#2a2210;--warn-line:#5b4718;--warn-ink:#e6c98a;--brand-1:#0f1f3b;--brand-2:#173560}}
+/* THEME TOKENS: ACUD brand system. Brand red #ED1C24, black and white are the identity; red is a strategic accent only
+   (selected navigation, decision, weaker-sales series, top of the heat ramp, focus). Surfaces are tonal charcoal, never pure black.
+   Chart pair red/blue validated on the dark surface (dataviz validator: all checks pass). The official logo file is still pending (assets/acud-logo.svg slot). */
+:root{color-scheme:dark;
+/* brand */--red:#ED1C24;--red-strong:#D41A21;--red-deep:#8F1F25;--red-text:#FF5A60;--red-tint:rgba(237,28,36,.14);--black:#000000;--white:#FFFFFF;
+/* header */--brand-1:#0A0A0B;--brand-2:#1A1B1E;--brand-ink:#F5F5F3;
+/* surface hierarchy: app < sidebar < panel < elevated */--bg:#0E0F11;--sidebar:#131417;--surface:#16181B;--elevated:#1F2226;--field-bg:#1B1D21;
+/* text: primary / secondary / muted */--ink:#ECECEA;--ink2:#B4B6BA;--muted:#8A8D93;
+/* separators */--line:#2A2D32;--axis:#3A3E44;
+/* interactive */--nav-active-bg:var(--red-tint);--nav-active-ink:#FFFFFF;--nav-hover:#1B1D21;--focus:#FF5A60;
+/* chart series: red = weaker sales position / critical, blue = stronger sales position / primary measure */--s-strong:#3987e5;--s-weak:#ED1C24;
+/* insight roles */--ins-obs:#3987e5;--ins-int:#8A8D93;--ins-dec:#ED1C24;
+/* status */--warn-bg:#231D12;--warn-line:#4A3B1B;--warn-ink:#E3C688;--err:#FF6B70;
+/* blue tints for the pain-point bars */--r100:#cde2fb;--r200:#9ec5f4;--r300:#6da7ec;--r400:#3987e5;--r500:#4a8fd6;--r600:#184f95;--r700:#0d366b;
+/* tooltip */--tip-shadow:rgba(0,0,0,.55)}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 header{background:linear-gradient(115deg,var(--brand-1),var(--brand-2));color:var(--brand-ink);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 header img{height:38px;width:auto}header h1{font-size:18px;margin:0;font-weight:650}header p{margin:0;font-size:12px;opacity:.85}
 .shell{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 66px)}
-nav{background:var(--surface);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
-nav button{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;color:var(--ink2);font-weight:550}nav button:hover{background:var(--bg)}
-nav button[aria-current=true]{background:var(--brand-1);color:var(--brand-ink)}nav button:focus-visible{outline:2px solid var(--s-strong)}
+nav{background:var(--sidebar);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+nav button{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;color:var(--ink2);font-weight:550}nav button:hover{background:var(--nav-hover)}
+nav button[aria-current=true]{background:var(--nav-active-bg);color:var(--nav-active-ink);box-shadow:inset 3px 0 0 var(--red)}nav button:focus-visible{outline:2px solid var(--focus)}
 main{padding:16px 22px 48px;max-width:1240px;width:100%;min-width:0}
 .filters{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px}.filters label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:3px}
-select{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+select{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--field-bg);color:var(--ink)}
 .banner{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn-ink);border-radius:10px;padding:10px 13px;margin:0 0 14px;font-size:13px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
 .card h2{font-size:16px;margin:0 0 4px}.card .sub{font-size:12px;color:var(--muted);margin:0 0 12px}
@@ -27,16 +34,16 @@ select{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:8
 .kpi .l{font-size:12px;color:var(--muted)}.kpi .v{font-size:26px;font-weight:700}.kpi .n{font-size:11px;color:var(--muted)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .ins{display:grid;gap:8px}.ins div{padding:9px 12px;border-radius:8px;border-left:4px solid var(--axis);background:var(--bg)}.ins .t{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:block}
-.ins .interpretation{border-left-color:var(--s-weak)}.ins .decision{border-left-color:var(--brand-2)}.ins .observation{border-left-color:var(--s-strong)}
+.ins .interpretation{border-left-color:var(--ins-int)}.ins .decision{border-left-color:var(--ins-dec)}.ins .observation{border-left-color:var(--ins-obs)}
 table{border-collapse:collapse;width:100%;font-size:12.5px}th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600;background:var(--bg);white-space:nowrap}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}.wrap{overflow:auto}
 .pill{display:inline-block;border:1px solid var(--axis);border-radius:99px;padding:2px 9px;font-size:11.5px;white-space:nowrap}
 .legend{display:flex;gap:16px;font-size:12px;color:var(--ink2);margin-bottom:6px;flex-wrap:wrap}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:baseline}
 svg text{fill:var(--ink2);font:11.5px system-ui,sans-serif}svg .ax{stroke:var(--axis)}svg .gl{stroke:var(--line)}
-#tip{position:fixed;z-index:9;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--axis);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.18);max-width:300px;display:none}
+#tip{position:fixed;z-index:9;pointer-events:none;background:var(--elevated);color:var(--ink);border:1px solid var(--axis);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 4px 14px var(--tip-shadow);max-width:300px;display:none}
 .empty{color:var(--muted);padding:14px 0}details{margin-top:8px}summary{cursor:pointer;color:var(--ink2);font-size:12px}
 .heat td{text-align:center;font-variant-numeric:tabular-nums;min-width:68px;border:1px solid var(--surface)}.heat th{white-space:normal;min-width:68px}
-.view{display:none}.view.on{display:block}.small{font-size:12px;color:var(--muted)}.err{color:#b64b51}
+.view{display:none}.view.on{display:block}.small{font-size:12px;color:var(--muted)}.err{color:var(--err)}
 @media(max-width:900px){.shell{grid-template-columns:1fr}nav{flex-direction:row;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}.kpis{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}main{padding:12px}}
 </style></head><body>
 <header><img id="logo" src="assets/acud-logo.svg" alt="ACUD logo" onerror="this.remove()"><div><h1>Resident Service Intelligence</h1><p>Administrative Capital for Urban Development · Resident survey and service gap analysis</p></div></header>
@@ -63,8 +70,8 @@ const CLASS={high_priority:['▲','High priority'],medium_priority:['●','Mediu
 const ACT={investigate_service_deficiency:'Investigate service deficiency',investigate_cause_before_intervention:'Investigate cause before any intervention',investigate_accessibility_or_quality:'Investigate access or quality',review_operational_quality:'Review operational quality',collect_additional_resident_feedback:'Collect more resident feedback',request_commercial_investigation:'Request commercial investigation'};
 const GRADE={strong_descriptive:'Strong descriptive',consistent_but_limited:'Consistent but limited',preliminary_association:'Preliminary',weak_or_contradictory:'Weak or contradictory',insufficient_data:'Insufficient data',no_concern_detected:'No concern detected',no_service_explanation_found:'No service explanation found'};
 const MARK={strong_descriptive:'●',consistent_but_limited:'◐',preliminary_association:'○',weak_or_contradictory:'△'};
-const ramp=['#cde2fb','#9ec5f4','#6da7ec','#3987e5','#256abf','#184f95','#0d366b'];
-function rampColor(v){const i=Math.max(0,Math.min(ramp.length-1,Math.floor(v/0.5*ramp.length)));return [ramp[i],i>=3?'#fff':'#0b0b0b']}
+const ramp=['#1F2226','#2E2427','#4A2428','#6B2227','#8F1F25','#B81C22','#D41A21'];
+function rampColor(v){const i=Math.max(0,Math.min(ramp.length-1,Math.floor(v/0.5*ramp.length)));return [ramp[i],'#F5F5F3']}
 const pill=c=>{const [g,t]=CLASS[c]||['',c];return `<span class="pill">${g} ${esc(t)}</span>`};
 const svcLabel=k=>(D.satisfaction_by_service.find(s=>s.service===k)||{}).label_en||k;
 /* tooltips */
