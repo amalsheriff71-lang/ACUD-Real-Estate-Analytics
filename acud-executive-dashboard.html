@@ -4,8 +4,21 @@
 <style>
 /* THEME TOKENS: ACUD brand system. Brand red #ED1C24, black and white are the identity; red is a strategic accent only
    (selected navigation, decision, weaker-sales series, top of the heat ramp, focus). Surfaces are tonal charcoal, never pure black.
-   Chart pair red/blue validated on the dark surface (dataviz validator: all checks pass). Official logo: assets/acud-logo.png (supplied by the owner; opaque white background, shown as supplied). */
-:root{color-scheme:dark;
+   Chart pair red/blue validated on the dark surface and the light pair on white (dataviz validator: all checks pass in both). Light and dark follow the OS (prefers-color-scheme); data-theme="light" forces light. */
+:root{color-scheme:light;
+/* brand */--red:#ED1C24;--red-strong:#C8161D;--red-deep:#8F1F25;--red-text:#C8161D;--red-tint:rgba(237,28,36,.10);--black:#000000;--white:#FFFFFF;
+/* header */--brand-1:#0A0A0B;--brand-2:#1A1B1E;--brand-ink:#F5F5F3;
+/* surface hierarchy */--bg:#F4F4F2;--sidebar:#FFFFFF;--surface:#FFFFFF;--elevated:#FFFFFF;--field-bg:#FFFFFF;
+/* text */--ink:#111214;--ink2:#4A4D53;--muted:#6B6E75;
+/* separators */--line:#E2E2DE;--axis:#C4C5C8;
+/* interactive */--nav-active-bg:var(--red-tint);--nav-active-ink:#A5141A;--nav-hover:#EEEEEB;--focus:#C8161D;
+/* chart series */--s-strong:#2a78d6;--s-weak:#ED1C24;
+/* insight roles */--ins-obs:#2a78d6;--ins-int:#6B6E75;--ins-dec:#ED1C24;
+/* status */--warn-bg:#fff7e8;--warn-line:#f0d5a8;--warn-ink:#714d16;--err:#B3141B;
+/* blue tints for the pain-point bars */--r100:#cde2fb;--r200:#9ec5f4;--r300:#6da7ec;--r400:#3987e5;--r500:#256abf;--r600:#184f95;--r700:#0d366b;
+/* tooltip */--tip-shadow:rgba(0,0,0,.18);
+/* heatmap ramp (low to high) and cell text */--h0:#F6F6F4;--h1:#F8D9DB;--h2:#F1AEB2;--h3:#D13840;--h4:#C8161D;--h5:#A5141A;--h6:#8F1F25;--heat-lo:#111214;--heat-hi:#FFFFFF}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){color-scheme:dark;
 /* brand */--red:#ED1C24;--red-strong:#D41A21;--red-deep:#8F1F25;--red-text:#FF5A60;--red-tint:rgba(237,28,36,.14);--black:#000000;--white:#FFFFFF;
 /* header */--brand-1:#0A0A0B;--brand-2:#1A1B1E;--brand-ink:#F5F5F3;
 /* surface hierarchy: app < sidebar < panel < elevated */--bg:#0E0F11;--sidebar:#131417;--surface:#16181B;--elevated:#1F2226;--field-bg:#1B1D21;
@@ -16,14 +29,15 @@
 /* insight roles */--ins-obs:#3987e5;--ins-int:#8A8D93;--ins-dec:#ED1C24;
 /* status */--warn-bg:#231D12;--warn-line:#4A3B1B;--warn-ink:#E3C688;--err:#FF6B70;
 /* blue tints for the pain-point bars */--r100:#cde2fb;--r200:#9ec5f4;--r300:#6da7ec;--r400:#3987e5;--r500:#4a8fd6;--r600:#184f95;--r700:#0d366b;
-/* tooltip */--tip-shadow:rgba(0,0,0,.55)}
+/* tooltip */--tip-shadow:rgba(0,0,0,.55);
+/* heatmap ramp (low to high) and cell text */--h0:#1F2226;--h1:#2E2427;--h2:#4A2428;--h3:#6B2227;--h4:#8F1F25;--h5:#B81C22;--h6:#D41A21;--heat-lo:#F5F5F3;--heat-hi:#F5F5F3}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 header{background:linear-gradient(115deg,var(--brand-1),var(--brand-2));color:var(--brand-ink);padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-header img{height:60px;width:auto;border-radius:6px}header h1{font-size:18px;margin:0;font-weight:650}header p{margin:0;font-size:12px;opacity:.85}
+header img{height:38px;width:auto;background:#fff}header h1{font-size:18px;margin:0;font-weight:650}header p{margin:0;font-size:12px;opacity:.85}
 .shell{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 66px)}
 nav{background:var(--sidebar);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
 nav button{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;color:var(--ink2);font-weight:550}nav button:hover{background:var(--nav-hover)}
-nav button[aria-current=true]{background:var(--nav-active-bg);color:var(--nav-active-ink);box-shadow:inset 3px 0 0 var(--red)}nav button:focus-visible{outline:2px solid var(--focus)}
+nav button[aria-current=true]{background:var(--nav-active-bg);color:var(--nav-active-ink)}nav button:focus-visible{outline:2px solid var(--focus)}
 main{padding:16px 22px 48px;max-width:1240px;width:100%;min-width:0}
 .filters{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px}.filters label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:3px}
 select{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--field-bg);color:var(--ink)}
@@ -70,8 +84,8 @@ const CLASS={high_priority:['▲','High priority'],medium_priority:['●','Mediu
 const ACT={investigate_service_deficiency:'Investigate service deficiency',investigate_cause_before_intervention:'Investigate cause before any intervention',investigate_accessibility_or_quality:'Investigate access or quality',review_operational_quality:'Review operational quality',collect_additional_resident_feedback:'Collect more resident feedback',request_commercial_investigation:'Request commercial investigation'};
 const GRADE={strong_descriptive:'Strong descriptive',consistent_but_limited:'Consistent but limited',preliminary_association:'Preliminary',weak_or_contradictory:'Weak or contradictory',insufficient_data:'Insufficient data',no_concern_detected:'No concern detected',no_service_explanation_found:'No service explanation found'};
 const MARK={strong_descriptive:'●',consistent_but_limited:'◐',preliminary_association:'○',weak_or_contradictory:'△'};
-const ramp=['#1F2226','#2E2427','#4A2428','#6B2227','#8F1F25','#B81C22','#D41A21'];
-function rampColor(v){const i=Math.max(0,Math.min(ramp.length-1,Math.floor(v/0.5*ramp.length)));return [ramp[i],'#F5F5F3']}
+const ramp=['var(--h0)','var(--h1)','var(--h2)','var(--h3)','var(--h4)','var(--h5)','var(--h6)'];
+function rampColor(v){const i=Math.max(0,Math.min(ramp.length-1,Math.floor(v/0.5*ramp.length)));return [ramp[i],i>=3?'var(--heat-hi)':'var(--heat-lo)']}
 const pill=c=>{const [g,t]=CLASS[c]||['',c];return `<span class="pill">${g} ${esc(t)}</span>`};
 const svcLabel=k=>(D.satisfaction_by_service.find(s=>s.service===k)||{}).label_en||k;
 /* tooltips */
